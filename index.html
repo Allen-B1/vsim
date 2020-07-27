@@ -96,7 +96,7 @@ button.active-method {
 
 	display: grid;
 	grid-template-rows: 1fr 1fr;
-	grid-template-columns: 4fr 1fr;
+	grid-template-columns: 3fr 1fr;
 }
 #legislature-government {
 	grid-row: 2;
@@ -186,6 +186,7 @@ button.active-method {
 					<div id="voting-methods">
 						<button id="fptp" class="active-method">FPTP</button>
 						<button id="mmp-bnw">MMP-BNW</button>
+						<button id="irv">IRV</button>
 					</div>
 					<canvas id="chart2" width="128" height="128"></canvas>
 				</div>
@@ -258,8 +259,8 @@ function createDistrictElem(district, id) {
 	var elem = document.createElement("div");
 	elem.className = "district";
 	elem.id = "district-" + id;
-	elem.width = 64 * district.reps + "px";
-	elem.style.gridColumnEnd = "span " + district.reps;
+	elem.width = 64 + "px";
+	elem.style.gridColumnEnd = "span 1";
 	elem.classList.add("plurality-" + Simulator.getPluralities(district.voters)[0])
 	elem.tabIndex = "-1";
 	return elem;
@@ -366,7 +367,7 @@ function applyResults(results) {
 	}
 }
 
-let electorate = Simulator.generate(Array(6*6).fill(1));
+let electorate = Simulator.generate(36);
 let results = Simulator.FPTP.execute(electorate);
 applyElectorate(electorate);
 applyResults(results);
@@ -380,6 +381,13 @@ document.getElementById("fptp").onclick = function() {
 
 document.getElementById("mmp-bnw").onclick = function() {
 	results = Simulator.MMP_BNW.execute(electorate);
+	applyResults(results);
+	document.querySelector(".active-method").classList.remove("active-method");
+	this.classList.add("active-method");
+}
+
+document.getElementById("irv").onclick = function() {
+	results = Simulator.IRV.execute(electorate);
 	applyResults(results);
 	document.querySelector(".active-method").classList.remove("active-method");
 	this.classList.add("active-method");

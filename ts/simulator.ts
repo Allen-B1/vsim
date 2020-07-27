@@ -3,23 +3,23 @@ interface Votes {
 }
 
 interface District {
-    reps: number,
-    voters: Votes
+   voters: Votes
 }
+
 interface Electorate {
     districts: District[]
-    totalreps: number,
 }
 
 interface Rep {
     party: string,
-    district: number,
+    district: number | "list",
 }
 
 type Results = Rep[];
 
 interface VotingMethod {
     execute: (e: Electorate) => Results,
+    groupings: (e: Electorate) => number[]
 }
 
 const Simulator = (function() {
@@ -35,13 +35,14 @@ const Simulator = (function() {
         execute: function (e: Electorate): Results {
             let reps: Results = [];
             for (let i = 0; i < e.districts.length; i++) {
-                let winners = Simulator.getPluralities(e.districts[i].voters).slice(0, e.districts[i].reps);
-                for (let winner of winners) {
-                    reps.push({party: winner, district: i});
-                }
+                let winner = Simulator.getPluralities(e.districts[i].voters)[0];
+                reps.push({party: winner, district: i});
             }
             return reps;
-        }
+        },
+        groupings: function (e: Electorate): number[] {
+            return Array(e.districts.length).fill(1);
+        } 
     };
 
     const MMP_BNW: VotingMethod = {
@@ -56,7 +57,7 @@ const Simulator = (function() {
 
             let votes = Simulator.getTotalVotes(e);
 
-            while (reps.length < e.totalreps * 2) {
+            while (reps.length < e.districts.length * 2) {
                 // amount underrepresented
                 let diff = {};
                 for (let party in votes) {
@@ -95,23 +96,56 @@ const Simulator = (function() {
                 repcount[winnerParty] = (repcount[winnerParty]|0)+1;
             }
             return reps;
-        }
+        },
+        groupings: FPTP.groupings
+    };
+
+    const IRV: VotingMethod = {
+        execute: function(e: Electorate): Results {
+            // assume all voters vote the same way
+            // obv oversimplification but
+            let choices = {
+                labour: "liberal",
+                green: "labour",
+                conservative: "liberal",
+                liberal: undefined
+            };
+
+            let reps: Results = [];
+            let irvotes = {};
+            for (let i = 0; i < e.districts.length; i++) {
+                let votes = e.districts[i].voters;
+                Object.assign(irvotes, votes);
+                let winner = "";
+                for (let j = 0; j < 20; j++) {
+                    let order = Simulator.getPluralities(irvotes);
+                    if (order.length == 1) {
+                        winner = order[0];
+                        break;
+                    }
+
+                    let loser = order[order.length - 1];
+                    let nextChoice = choices[loser];
+                    if (nextChoice) {
+                        irvotes[nextChoice] += irvotes[loser];
+                    }
+                    delete irvotes[loser];
+                }
+
+                reps.push({party:winner, district: i});
+            }
+            return reps;
+        },
+        groupings: FPTP.groupings
     };
 
     return {
-        generate: function(districts: number[]): Electorate {
-            var totalreps = 0;
-            for (let repcount of districts) {
-                totalreps += repcount;
-            }
-
+        generate: function(districts: number): Electorate {
             var districtlist: District[] = []
-            for (let repcount of districts) {
+            for (let i = 0; i < districts; i++) {
                 var district: District = {
-                    reps: repcount,
                     voters: {}
                 };
-
 
                 var lib = Math.random() * 0.3 + 0.05;
                 var left = (Math.random() * 0.6 + 0.2) * (1-lib);
@@ -129,7 +163,6 @@ const Simulator = (function() {
 
             return {
                 districts: districtlist,
-                totalreps: totalreps,
             };
         },
 
@@ -138,7 +171,7 @@ const Simulator = (function() {
             for (let district of electorate.districts) {
                 for (let party in district.voters) {
                     if (typeof district.voters[party] == "number") {
-                        m[party] = (m[party] || 0) + district.voters[party] * (district.reps / electorate.totalreps);
+                        m[party] = (m[party] || 0) + district.voters[party] / electorate.districts.length;
                     }
                 }
             }
@@ -160,5 +193,6 @@ const Simulator = (function() {
 
         FPTP: FPTP,
         MMP_BNW: MMP_BNW,
+        IRV: IRV,
     }
 })();
