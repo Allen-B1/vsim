@@ -95,8 +95,14 @@ button.active-method {
 	padding: 16px;
 
 	display: grid;
-	grid-template-rows: 1fr 1fr;
+	grid-template-rows: 1fr 1fr auto;
 	grid-template-columns: 3fr 1fr;
+}
+#legislature h4 {
+	grid-row: 3;
+	grid-column: 1 / span 2;
+	text-align: center;
+	margin-bottom: 0;
 }
 #legislature-government {
 	grid-row: 2;
@@ -191,6 +197,7 @@ button.active-method {
 					<canvas id="chart2" width="128" height="128"></canvas>
 				</div>
 				<div id="legislature">
+					<h4 id="legislature-title">Government</h4>
 					<div id="legislature-government"></div>
 					<div id="legislature-opposition"></div>
 					<div id="legislature-crossbench"></div>
@@ -268,7 +275,7 @@ function createDistrictElem(district, id) {
 
 function chartData(votes) {
 	return {
-		labels: ["Labour", "Conservative", "Liberal", "Greens"],
+		labels: ["Labour", "Conservative", "Liberal", "Green"],
 		datasets: [{
 			data: [votes.labour, votes.conservative, votes.liberal, votes.green],
 			backgroundColor: ["#F15959", "#59BFF1", "#F1D859", "#8CF159"]
@@ -365,6 +372,15 @@ function applyResults(results) {
 			}
 		}
 	}
+
+	let labels = {
+		labour: "Labour",
+		green: "Green",
+		conservative: "Conservative",
+		liberal: "Liberal"
+	}
+
+	document.getElementById("legislature-title").innerHTML = government.map((party) => labels[party]).join("-") + " Government";
 }
 
 let electorate = Simulator.generate(36);
