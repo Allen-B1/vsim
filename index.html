@@ -208,12 +208,12 @@ button.active-method {
 		<script src="simulator.js"></script>
 		<script src="chart.js"></script>
 		<script>
-var mapElem = document.getElementById("map");
-var chart1Ctx = document.getElementById("chart1").getContext("2d");
-var chart2Ctx = document.getElementById("chart2").getContext("2d");
-var chart3Ctx = document.getElementById("chart3").getContext("2d");
+const mapElem = document.getElementById("map");
+const chart1Ctx = document.getElementById("chart1").getContext("2d");
+const chart2Ctx = document.getElementById("chart2").getContext("2d");
+const chart3Ctx = document.getElementById("chart3").getContext("2d");
 
-var chartConfig = {
+const chartConfig = {
 	type: 'pie',
 	options: {
 		animation: {duration: 0},
@@ -221,32 +221,32 @@ var chartConfig = {
 		title: {text: "", display: true},
 		tooltips: {
 			callbacks: {
-				label: function(tooltipItem, data) {
-					var label = data.labels[tooltipItem.index] || "";
-					var percent = data.datasets[0].data[tooltipItem.index] * 100;
-					percent = percent.toFixed(1) + "%";
-					return label + ": " + percent;
+				label: (tooltipItem, data) => {
+					const label = data.labels[tooltipItem.index] || "";
+					let percent = data.datasets[0].data[tooltipItem.index] * 100;
+					percent = `${percent.toFixed(1)}%`;
+					return `{label}: ${percent}`;
 				}
 			}
 		},
 		responsive: false
 	},
 };
-var chart1 = new Chart(chart1Ctx, Object.create(chartConfig));
-var chart2 = new Chart(chart2Ctx, Object.create(chartConfig));
-var chart3 = new Chart(chart3Ctx, Object.create(chartConfig));
+const chart1 = new Chart(chart1Ctx, Object.create(chartConfig));
+const chart2 = new Chart(chart2Ctx, Object.create(chartConfig));
+const chart3 = new Chart(chart3Ctx, Object.create(chartConfig));
 
 chart2.config.options.title.text = "Legislature";
-chart2.config.options.tooltips.callbacks.label = function(tooltipItem, data) {
-	var label = data.labels[tooltipItem.index] || "";
-	return label + ": " + data.datasets[0].data[tooltipItem.index];
+chart2.config.options.tooltips.callbacks.label = (tooltipItem, data) => {
+	const label = data.labels[tooltipItem.index] || "";
+	return `${label}: ${data.datasets[0].data[tooltipItem.index]}`;
 }
 
-function createRepElem(rep) {
-	var elem = document.createElement("div");
+const createRepElem = rep =>{
+	const elem = document.createElement("div");
 	elem.classList.add("rep");
-	elem.classList.add("rep-" + rep.party);
-	elem.classList.add("rep-district-" + rep.district);
+	elem.classList.add(`rep-${rep.party}`);
+	elem.classList.add(`rep-district-${rep.district}`);
 
 	elem.innerHTML = {
 		labour: "L",
@@ -256,16 +256,16 @@ function createRepElem(rep) {
 	}[rep.party] + rep.district;
 
 	elem.onclick = function() {
-		document.getElementById("district-" + rep.district).focus();
+		document.getElementById(`district-${rep.district}`).focus();
 	};
 
 	return elem;
 }
 
-function createDistrictElem(district, id) {
-	var elem = document.createElement("div");
+const createDistrictElem = (district, id) => {
+	const elem = document.createElement("div");
 	elem.className = "district";
-	elem.id = "district-" + id;
+	elem.id = `district-${id}`;
 	elem.width = 64 + "px";
 	elem.style.gridColumnEnd = "span 1";
 	elem.classList.add("plurality-" + Simulator.getPluralities(district.voters)[0])
@@ -273,7 +273,7 @@ function createDistrictElem(district, id) {
 	return elem;
 }
 
-function chartData(votes) {
+const chartData = votes => {
 	return {
 		labels: ["Labour", "Conservative", "Liberal", "Green"],
 		datasets: [{
@@ -283,55 +283,47 @@ function chartData(votes) {
 	}
 }
 
-function applyElectorate(electorate) {
-	for (let i = 0; i < electorate.districts.length; i++) {
-		var elem = createDistrictElem(electorate.districts[i], i);
-		elem.onfocus = function() {
-			chart3.data = chartData(electorate.districts[i].voters)
-			chart3.config.options.title.text =  "District " + i;
+const applyElectorate = electorate => {
+	electorate.districts.forEach(district => {
+		const elem = createDistrictElem(district, i);
+		elem.onfocus = () => {
+			chart3.data = chartData(district.voters)
+			chart3.config.options.title.text =  `District ${i}`;
 			chart3.update();
 			document.getElementById("district").style.opacity = 1;
-			let reps = document.getElementsByClassName("rep-district-" + i);
-			for (let rep of reps) {
-				rep.classList.add("active");
-			}
+			const reps = document.getElementsByClassName(`rep-district-${i}`);
+			reps.forEach(rep => rep.classList.add("active"));
 		};
-		elem.onblur = function() {
+		elem.onblur = () => {
 			chart3.data = {labels:[],datasets:[{data:[]}]};
 			chart3.config.options.title.text = "";
 			chart3.update();
 			document.getElementById("district").style.opacity = 0;
-			let reps = document.querySelectorAll(".rep.active");
-			for (let rep of reps) {
-				rep.classList.remove("active");				
-			}
+			const reps = document.querySelectorAll(".rep.active");
+			reps.forEach(rep => rep.classList.remove("active"));
 		}
 		mapElem.appendChild(elem);
-	}
+	});
 
-	var totalVotes = Simulator.getTotalVotes(electorate);
+	const totalVotes = Simulator.getTotalVotes(electorate);
 	chart1.data = chartData(totalVotes);
 	chart1.config.options.title.text = "National";
 	chart1.update();
 }
 
-function applyResults(results) {
-	var repcount = {};
-	for (var i = 0; i < results.length; i++) {
-		let rep = results[i];
+const applyResults = results => {
+	let repcount = {};
+	results.forEach(rep => {
 		repcount[rep.party] = (repcount[rep.party] | 0) + 1;
-	}
+	});
+
 	chart2.data = chartData(repcount);
 	chart2.update();
 
-	var parties = [];
-	for (let party in repcount) {
-		parties.push(party);
-	}
+	let parties = [];
+	repCount.forEach(party => parties.push(party));
 
-	parties.sort(function(i, j) {
-		return repcount[j] - repcount[i];
-	});
+	parties.sort((i, j) => repcount[j] = repcount[i]);
 
 	let government = [parties[0]];
 	if (repcount.labour + repcount.green > repcount[government[0]]) {
@@ -348,61 +340,49 @@ function applyResults(results) {
 		oppElem =  document.getElementById("legislature-opposition"),
 		crossElem = document.getElementById("legislature-crossbench");
 	govElem.innerHTML = oppElem.innerHTML = crossElem.innerHTML = "";
-	for (let gparty of government) {
-		for (let rep of results) {
-			if (rep.party == gparty) {
-				let elem = createRepElem(rep);
-				govElem.appendChild(elem);
-			}
-		}
-	}
-	for (let gparty of opposition) {
-		for (let rep of results) {
-			if (rep.party == gparty) {
-				let elem = createRepElem(rep);
-				oppElem.appendChild(elem);
-			}
-		}
-	}
-	for (let gparty of crossbench) {
-		for (let rep of results) {
-			if (rep.party == gparty) {
-				let elem = createRepElem(rep);
-				crossElem.appendChild(elem);
-			}
-		}
-	}
 
-	let labels = {
+	const gparties = [government,  opposition,  crossbench];
+	const elements = [govElem, oppElem, crossElem];
+
+	gparties.forEach((gparty,index) => {
+		results.forEach(rep => {
+			if (rep.party == gparty) {
+				const elem = createRepElem(rep);
+				elements[index].appendChild(elem);
+			}
+		})
+	})
+
+	const labels = {
 		labour: "Labour",
 		green: "Green",
 		conservative: "Conservative",
 		liberal: "Liberal"
 	}
 
-	document.getElementById("legislature-title").innerHTML = government.map((party) => labels[party]).join("-") + " Government";
+	document.getElementById("legislature-title").innerHTML = `${government.map((party) => labels[party]).join("-")} Government`;
 }
 
-let electorate = Simulator.generate(36);
-let results = Simulator.FPTP.execute(electorate);
+const electorate = Simulator.generate(36);
+const results = Simulator.FPTP.execute(electorate);
 applyElectorate(electorate);
 applyResults(results);
 
-document.getElementById("fptp").onclick = function() {
+document.getElementById("fptp").onclick = () => {
 	results = Simulator.FPTP.execute(electorate);
 	applyResults(results);
 	document.querySelector(".active-method").classList.remove("active-method");
 	this.classList.add("active-method");
 }
 
-document.getElementById("mmp-bnw").onclick = function() {
+document.getElementById("mmp-bnw").onclick = () => {
 	results = Simulator.MMP_BNW.execute(electorate);
 	applyResults(results);
 	document.querySelector(".active-method").classList.remove("active-method");
 	this.classList.add("active-method");
 }
 
-document.getElementById("irv").onclick = function() {
+document.getElementById("irv").onclick = () => {
 	results = Simulator.IRV.execute(electorate);
 	applyResults(results);
 	document.querySelector(".active-method").classList.remove("active-method");
