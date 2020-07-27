@@ -74,10 +74,10 @@ var Simulator = (function () {
             // assume all voters vote the same way
             // obv oversimplification but
             var choices = {
-                labour: "liberal",
-                green: "labour",
-                conservative: "liberal",
-                liberal: undefined
+                labour: ["labour", "green", "liberal"],
+                green: ["green", "labour", "liberal"],
+                conservative: ["conservative", "liberal", "labour"],
+                liberal: ["liberal"]
             };
             var reps = [];
             var irvotes = {};
@@ -85,18 +85,29 @@ var Simulator = (function () {
                 var votes = e.districts[i].voters;
                 Object.assign(irvotes, votes);
                 var winner = "";
+                console.log(i);
                 for (var j = 0; j < 20; j++) {
                     var order = Simulator.getPluralities(irvotes);
+                    console.log(order);
                     if (order.length == 1) {
                         winner = order[0];
                         break;
                     }
+                    // Eliminate lowest vote %
                     var loser = order[order.length - 1];
-                    var nextChoice = choices[loser];
-                    if (nextChoice) {
-                        irvotes[nextChoice] += irvotes[loser];
-                    }
                     delete irvotes[loser];
+                    order = order.slice(0, -1);
+                    // Recalculate irvotes
+                    irvotes = {};
+                    for (var party in choices) {
+                        for (var _i = 0, _a = choices[party]; _i < _a.length; _i++) {
+                            var choice = _a[_i];
+                            if (order.indexOf(choice) != -1) {
+                                irvotes[choice] = (irvotes[choice] || 0) + votes[party];
+                                break;
+                            }
+                        }
+                    }
                 }
                 reps.push({ party: winner, district: i });
             }

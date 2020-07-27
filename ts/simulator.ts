@@ -105,10 +105,10 @@ const Simulator = (function() {
             // assume all voters vote the same way
             // obv oversimplification but
             let choices = {
-                labour: "liberal",
-                green: "labour",
-                conservative: "liberal",
-                liberal: undefined
+                labour: ["labour", "green", "liberal"],
+                green: ["green", "labour", "liberal"],
+                conservative: ["conservative", "liberal", "labour"],
+                liberal: ["liberal"]
             };
 
             let reps: Results = [];
@@ -117,19 +117,30 @@ const Simulator = (function() {
                 let votes = e.districts[i].voters;
                 Object.assign(irvotes, votes);
                 let winner = "";
+                console.log(i);
                 for (let j = 0; j < 20; j++) {
                     let order = Simulator.getPluralities(irvotes);
+                    console.log(order);
                     if (order.length == 1) {
                         winner = order[0];
                         break;
                     }
 
+                    // Eliminate lowest vote %
                     let loser = order[order.length - 1];
-                    let nextChoice = choices[loser];
-                    if (nextChoice) {
-                        irvotes[nextChoice] += irvotes[loser];
-                    }
                     delete irvotes[loser];
+                    order = order.slice(0, -1);
+
+                    // Recalculate irvotes
+                    irvotes = {};
+                    for (let party in choices) {
+                        for (let choice of choices[party]) {
+                            if (order.indexOf(choice) != -1) {
+                                irvotes[choice] = (irvotes[choice] || 0) + votes[party];
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 reps.push({party:winner, district: i});
