@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Voting Simulator</title>
+		<style>
+body {
+	background: #fff;
+	font-family: sans-serif;
+}
+h1, h2, h3 {
+	text-align: center;
+}
+h5 {
+	margin: 0;
+	margin-bottom: 4px;
+}
+
+main {
+	display: flex; 
+	flex-direction: row;
+}
+
+#electorate {
+	flex-grow: 1;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 1fr auto;
+}
+#electorate-map {
+	grid-row: 1;
+	grid-column: 1 / span 2; }
+#electorate-national {
+	padding: 16px;
+	grid-row: 2;
+	grid-column: 1; }
+#district {
+	padding: 16px;
+	grid-row: 2; 
+	grid-column: 2; }
+#electorate-national canvas, #district canvas {
+	margin: auto; }
+
+#map-container {
+	max-width: 512px;
+	position: relative;
+	margin: auto; }
+#map-container > :first-child {
+	padding-bottom: 100%; }
+
+#map {
+	background: #fff;
+	display: grid;
+	grid-template-rows: repeat(6, 1fr);
+	grid-template-columns: repeat(6, 1fr);
+
+	position: absolute;
+	top: 0; left: 0; bottom: 0; right: 0;
+}
+.district {
+	margin: 2px;
+	border: 4px solid #ddd;
+	background: #ddd;
+}
+.district:focus {
+	border: 4px solid #aaa;
+	outline: 0;
+}
+
+.plurality-labour, .rep-labour {
+	background:#F15959;
+	border-color: #F15959 }
+.plurality-conservative, .rep-conservative {
+	background: #59BFF1;
+	border-color: #59BFF1; }
+.plurality-liberal, .rep-liberal {
+	background: #F1D859;
+	border-color: #F1D859 }
+.plurality-green, .rep-green {
+	background: #8CF159;
+	border-color:#8CF159; }
+
+#section-results {
+	display: flex;
+	flex-direction: column;
+	width: 50%; }
+#results-header {
+	display: flex;
+	flex-direction: row;
+	margin-bottom: 16px; }
+#voting-methods {
+	flex-grow: 1;
+	padding: 16px; }
+
+button {
+	border: 0;
+	background: #fff;
+	border: 2px solid #fff;
+	padding: 4px 8px;
+	font-size: 16px;
+}
+button.active-method {
+	border: 2px solid #aaa;
+}
+
+#legislature {
+	margin: 16px;
+	background: #eee;
+	padding: 16px;
+
+	display: grid;
+	grid-template-rows: 1fr 1fr;
+	grid-template-columns: 3fr 1fr;
+}
+#legislature-government {
+	grid-row: 2;
+	grid-column: 1;
+	align-items: flex-end;
+	align-content: flex-end;
+	justify-content: flex-start; }
+#legislature-opposition {
+	grid-row: 1;
+	grid-column: 1;
+	align-items: flex-start;
+	align-content: flex-start;
+	justify-content: flex-start; }
+#legislature-crossbench {
+	grid-row: 1 / span 2;
+	grid-column: 2;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	flex-wrap: wrap;
+	max-height: 384px;
+	align-content: flex-end;
+	align-self: center; }
+
+#legislature-government, #legislature-opposition {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.rep {
+	display: inline-block;
+	padding: 8px 0;
+	text-align: center;
+	width: 28px;
+	font-size: 12px;
+	color: rgba(0,0,0,0.9);
+	margin: 8px;
+}
+
+		</style>
+	</head>
+	<body>
+		<main>
+			<section id="electorate">
+				<div id="electorate-map">
+					<h2>Everylandia</h2>
+					<div id="map-container">
+						<div></div>
+						<div id="map">
+
+						</div>
+					</div>
+				</div>
+				<div id="electorate-national">
+					<canvas id="chart1" width="128" height="128"></canvas>
+				</div>
+				<div id="district" style="opacity:0">
+					<canvas id="chart3" width="128" height="128"></canvas>
+				</div>
+			</section>
+
+			<section id="section-results">
+				<div id="results-header">
+					<div id="voting-methods">
+						<button id="fptp" class="active-method">FPTP</button>
+						<button id="mmp-bnw">MMP-BNW</button>
+					</div>
+					<canvas id="chart2" width="128" height="128"></canvas>
+				</div>
+				<div id="legislature">
+					<div id="legislature-government"></div>
+					<div id="legislature-opposition"></div>
+					<div id="legislature-crossbench"></div>
+				</div>
+			</section>
+		</main>
+
+		<script src="simulator.js"></script>
+		<script src="chart.js"></script>
+		<script>
+var mapElem = document.getElementById("map");
+var chart1Ctx = document.getElementById("chart1").getContext("2d");
+var chart2Ctx = document.getElementById("chart2").getContext("2d");
+var chart3Ctx = document.getElementById("chart3").getContext("2d");
+
+var chartConfig = {
+	type: 'pie',
+	options: {
+		animation: {duration: 0},
+		legend: {display: false},
+		title: {text: "", display: true},
+		tooltips: {
+			callbacks: {
+				label: function(tooltipItem, data) {
+					var label = data.labels[tooltipItem.index] || "";
+					var percent = data.datasets[0].data[tooltipItem.index] * 100;
+					percent = percent.toFixed(1) + "%";
+					return label + ": " + percent;
+				}
+			}
+		},
+		responsive: false
+	},
+};
+var chart1 = new Chart(chart1Ctx, Object.create(chartConfig));
+var chart2 = new Chart(chart2Ctx, Object.create(chartConfig));
+var chart3 = new Chart(chart3Ctx, Object.create(chartConfig));
+
+chart2.config.options.title.text = "Legislature";
+chart2.config.options.tooltips.callbacks.label = function(tooltipItem, data) {
+	var label = data.labels[tooltipItem.index] || "";
+	return label + ": " + data.datasets[0].data[tooltipItem.index];
+}
+
+function createRepElem(rep) {
+	var elem = document.createElement("div");
+	elem.classList.add("rep");
+	elem.classList.add("rep-" + rep.party);
+
+	elem.innerHTML = {
+		labour: "L",
+		green: "G",
+		liberal: "LB",
+		conservative: "C"
+	}[rep.party] + rep.district;
+	return elem;
+}
+
+function createDistrictElem(district, id) {
+	var elem = document.createElement("div");
+	elem.className = "district";
+	elem.id = "district-" + id;
+	elem.width = 64 * district.reps + "px";
+	elem.style.gridColumnEnd = "span " + district.reps;
+	elem.classList.add("plurality-" + Simulator.getPluralities(district.voters)[0])
+	elem.tabIndex = "-1";
+	return elem;
+}
+
+function chartData(votes) {
+	return {
+		labels: ["Labour", "Conservative", "Liberal", "Greens"],
+		datasets: [{
+			data: [votes.labour, votes.conservative, votes.liberal, votes.green],
+			backgroundColor: ["#F15959", "#59BFF1", "#F1D859", "#8CF159"]
+		}],
+	}
+}
+
+function applyElectorate(electorate) {
+	for (let i = 0; i < electorate.districts.length; i++) {
+		var elem = createDistrictElem(electorate.districts[i], i);
+		elem.onfocus = function() {
+			chart3.data = chartData(electorate.districts[i].voters)
+			chart3.config.options.title.text =  "District " + i;
+			chart3.update();
+			document.getElementById("district").style.opacity = 1;
+		};
+		elem.onblur = function() {
+			chart3.data = {labels:[],datasets:[{data:[]}]};
+			chart3.config.options.title.text = "";
+			chart3.update();
+			document.getElementById("district").style.opacity = 0;
+		}
+		mapElem.appendChild(elem);
+	}
+
+	var totalVotes = Simulator.getTotalVotes(electorate);
+	chart1.data = chartData(totalVotes);
+	chart1.config.options.title.text = "National";
+	chart1.update();
+}
+
+function applyResults(results) {
+	var repcount = {};
+	for (var i = 0; i < results.length; i++) {
+		let rep = results[i];
+		repcount[rep.party] = (repcount[rep.party] | 0) + 1;
+	}
+	chart2.data = chartData(repcount);
+	chart2.update();
+
+	var parties = [];
+	for (let party in repcount) {
+		parties.push(party);
+	}
+
+	parties.sort(function(i, j) {
+		return repcount[j] - repcount[i];
+	});
+
+	let government = [parties[0]];
+	if (repcount.labour + repcount.green > repcount[government[0]]) {
+		government = ["labour", "green"];
+	}
+
+	let opposition = [parties.find((party) => government.indexOf(party) == -1)];
+
+	console.log(government, opposition);
+
+	let govElem = document.getElementById("legislature-government"),
+		oppElem =  document.getElementById("legislature-opposition"),
+		crossElem = document.getElementById("legislature-crossbench");
+	govElem.innerHTML = oppElem.innerHTML = crossElem.innerHTML = "";
+	for (let rep of results) {
+		let elem = createRepElem(rep);
+		if (government.indexOf(rep.party) != -1) {
+			govElem.appendChild(elem);
+		} else if (opposition.indexOf(rep.party) != -1) {
+			oppElem.appendChild(elem);
+		} else {
+			crossElem.appendChild(elem);
+		}
+	}
+}
+
+let electorate = Simulator.generate(Array(6*6).fill(1));
+let results = Simulator.FPTP.execute(electorate);
+applyElectorate(electorate);
+applyResults(results);
+
+document.getElementById("fptp").onclick = function() {
+	results = Simulator.FPTP.execute(electorate);
+	applyResults(results);
+	document.querySelector(".active-method").classList.remove("active-method");
+	this.classList.add("active-method");
+}
+
+document.getElementById("mmp-bnw").onclick = function() {
+	results = Simulator.MMP_BNW.execute(electorate);
+	applyResults(results);
+	document.querySelector(".active-method").classList.remove("active-method");
+	this.classList.add("active-method");
+}
+		</script>
+	</body>
+</html>
