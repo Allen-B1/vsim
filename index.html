@@ -62,22 +62,9 @@ main {
 	background: #ddd;
 }
 .district:focus {
-	border: 4px solid #aaa;
+	border: 4px solid #888;
 	outline: 0;
 }
-
-.plurality-labour, .rep-labour {
-	background:#F15959;
-	border-color: #F15959 }
-.plurality-conservative, .rep-conservative {
-	background: #59BFF1;
-	border-color: #59BFF1; }
-.plurality-liberal, .rep-liberal {
-	background: #F1D859;
-	border-color: #F1D859 }
-.plurality-green, .rep-green {
-	background: #8CF159;
-	border-color:#8CF159; }
 
 #section-results {
 	display: flex;
@@ -99,7 +86,7 @@ button {
 	font-size: 16px;
 }
 button.active-method {
-	border: 2px solid #aaa;
+	background: #ddd;
 }
 
 #legislature {
@@ -146,14 +133,32 @@ button.active-method {
 
 .rep {
 	display: inline-block;
-	padding: 10px 0;
+	padding: 8px 0;
 	text-align: center;
-	width: 32px;
+	width: 28px;
 	font-size: 12px;
 	color: rgba(0,0,0,0.9);
 	margin: 4px;
+	border: 4px solid;
 }
 
+.rep.active {
+	border: 4px solid #888;
+}
+
+
+.plurality-labour, .rep-labour {
+	background:#F15959;
+	border-color: #F15959 }
+.plurality-conservative, .rep-conservative {
+	background: #59BFF1;
+	border-color: #59BFF1; }
+.plurality-liberal, .rep-liberal {
+	background: #F1D859;
+	border-color: #F1D859 }
+.plurality-green, .rep-green {
+	background: #8CF159;
+	border-color:#8CF159; }
 		</style>
 	</head>
 	<body>
@@ -233,6 +238,7 @@ function createRepElem(rep) {
 	var elem = document.createElement("div");
 	elem.classList.add("rep");
 	elem.classList.add("rep-" + rep.party);
+	elem.classList.add("rep-district-" + rep.district);
 
 	elem.innerHTML = {
 		labour: "L",
@@ -240,6 +246,11 @@ function createRepElem(rep) {
 		liberal: "LB",
 		conservative: "C"
 	}[rep.party] + rep.district;
+
+	elem.onclick = function() {
+		document.getElementById("district-" + rep.district).focus();
+	};
+
 	return elem;
 }
 
@@ -272,12 +283,20 @@ function applyElectorate(electorate) {
 			chart3.config.options.title.text =  "District " + i;
 			chart3.update();
 			document.getElementById("district").style.opacity = 1;
+			let reps = document.getElementsByClassName("rep-district-" + i);
+			for (let rep of reps) {
+				rep.classList.add("active");
+			}
 		};
 		elem.onblur = function() {
 			chart3.data = {labels:[],datasets:[{data:[]}]};
 			chart3.config.options.title.text = "";
 			chart3.update();
 			document.getElementById("district").style.opacity = 0;
+			let reps = document.querySelectorAll(".rep.active");
+			for (let rep of reps) {
+				rep.classList.remove("active");				
+			}
 		}
 		mapElem.appendChild(elem);
 	}
