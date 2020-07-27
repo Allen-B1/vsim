@@ -41,7 +41,7 @@ main {
 	margin: auto; }
 
 #map-container {
-	max-width: 512px;
+	max-width: 384px;
 	position: relative;
 	margin: auto; }
 #map-container > :first-child {
@@ -109,7 +109,7 @@ button.active-method {
 
 	display: grid;
 	grid-template-rows: 1fr 1fr;
-	grid-template-columns: 3fr 1fr;
+	grid-template-columns: 4fr 1fr;
 }
 #legislature-government {
 	grid-row: 2;
@@ -121,18 +121,22 @@ button.active-method {
 	grid-row: 1;
 	grid-column: 1;
 	align-items: flex-start;
-	align-content: flex-start;
-	justify-content: flex-start; }
+	align-content: flex-end;
+	justify-content: flex-start;
+	flex-wrap: wrap-reverse !important; }
 #legislature-crossbench {
 	grid-row: 1 / span 2;
 	grid-column: 2;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	flex-wrap: wrap;
+
+	align-self: center;
+
 	max-height: 384px;
-	align-content: flex-end;
-	align-self: center; }
+
+	display: flex;
+	flex-direction: row-reverse;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	align-content: flex-end; }
 
 #legislature-government, #legislature-opposition {
 	display: flex;
@@ -141,12 +145,12 @@ button.active-method {
 
 .rep {
 	display: inline-block;
-	padding: 8px 0;
+	padding: 10px 0;
 	text-align: center;
-	width: 28px;
+	width: 32px;
 	font-size: 12px;
 	color: rgba(0,0,0,0.9);
-	margin: 8px;
+	margin: 4px;
 }
 
 		</style>
@@ -308,20 +312,36 @@ function applyResults(results) {
 
 	let opposition = [parties.find((party) => government.indexOf(party) == -1)];
 
+	let crossbench = parties.filter((party) => government.indexOf(party) == -1 && opposition.indexOf(party) == -1);
+
 	console.log(government, opposition);
 
 	let govElem = document.getElementById("legislature-government"),
 		oppElem =  document.getElementById("legislature-opposition"),
 		crossElem = document.getElementById("legislature-crossbench");
 	govElem.innerHTML = oppElem.innerHTML = crossElem.innerHTML = "";
-	for (let rep of results) {
-		let elem = createRepElem(rep);
-		if (government.indexOf(rep.party) != -1) {
-			govElem.appendChild(elem);
-		} else if (opposition.indexOf(rep.party) != -1) {
-			oppElem.appendChild(elem);
-		} else {
-			crossElem.appendChild(elem);
+	for (let gparty of government) {
+		for (let rep of results) {
+			if (rep.party == gparty) {
+				let elem = createRepElem(rep);
+				govElem.appendChild(elem);
+			}
+		}
+	}
+	for (let gparty of opposition) {
+		for (let rep of results) {
+			if (rep.party == gparty) {
+				let elem = createRepElem(rep);
+				oppElem.appendChild(elem);
+			}
+		}
+	}
+	for (let gparty of crossbench) {
+		for (let rep of results) {
+			if (rep.party == gparty) {
+				let elem = createRepElem(rep);
+				crossElem.appendChild(elem);
+			}
 		}
 	}
 }
