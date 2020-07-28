@@ -334,7 +334,7 @@ function applyResults(results) {
 	});
 
 	let government = [parties[0]];
-	if (repcount.labour + repcount.green > repcount[government[0]]) {
+	if (repcount.labour + repcount.green > repcount[government[0]] && government[0] !== "labour" && government[0] !== "green") {
 		government = ["labour", "green"];
 	}
 
