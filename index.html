@@ -26,21 +26,13 @@ main {
 }
 
 #electorate {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	grid-template-rows: 1fr 138px;
+	display: flex;
+	flex-direction: column;
 }
-#electorate-map {
-	grid-row: 1;
-	grid-column: 1 / span 2; }
-#electorate-national {
-	padding: 16px;
-	grid-row: 2;
-	grid-column: 1; }
-#district {
-	padding: 16px;
-	grid-row: 2; 
-	grid-column: 2; }
+#electorate-charts {
+	display: flex;
+	flex-direction: row;
+	justify-content: center; }
 
 #map-container {
 	max-width: 384px;
@@ -78,8 +70,8 @@ main {
 #voting-methods {
 	flex-grow: 1;
 	padding: 16px; }
-#electorate-national canvas {
-	float: right; }
+canvas {
+	margin: auto; }
 
 button {
 	border: 0;
@@ -237,11 +229,13 @@ button:active {
 						</div>
 					</div>
 				</div>
-				<div id="electorate-national">
-					<canvas id="chart1" width="128" height="128"></canvas>
-				</div>
-				<div id="district" style="opacity:0">
-					<canvas id="chart3" width="128" height="128"></canvas>
+				<div id="electorate-charts">
+					<div id="electorate-national">
+						<canvas id="chart1" width="128" height="128"></canvas>
+					</div>
+					<div id="district" style="display:none">
+						<canvas id="chart3" width="128" height="128"></canvas>
+					</div>
 				</div>
 			</section>
 
@@ -402,7 +396,7 @@ function applyElectorate(electorate, shape) {
 			chart3.data = chartData(Simulator.getTotalVotes(districts))
 			chart3.config.options.title.text =  "District " + ids.join("-");
 			chart3.update();
-			document.getElementById("district").style.opacity = 1;
+			document.getElementById("district").style.display = "block";
 
 			for (let id of ids) {
 				let reps = document.getElementsByClassName("rep-district-" + id);
@@ -415,7 +409,7 @@ function applyElectorate(electorate, shape) {
 			chart3.data = {labels:[],datasets:[{data:[]}]};
 			chart3.config.options.title.text = "";
 			chart3.update();
-			document.getElementById("district").style.opacity = 0;
+			document.getElementById("district").style.display = "none";
 			let reps = document.querySelectorAll(".rep.active");
 			for (let rep of reps) {
 				rep.classList.remove("active");				
@@ -428,7 +422,7 @@ function applyElectorate(electorate, shape) {
 
 	var totalVotes = Simulator.getTotalVotes(electorate.districts);
 	chart1.data = chartData(totalVotes);
-	chart1.config.options.title.text = "National";
+	chart1.config.options.title.text = "Popular Vote";
 	chart1.update();
 
 	if (totalVotes.labour >= 0.99) {
