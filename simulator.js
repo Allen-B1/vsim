@@ -39,9 +39,17 @@ var Simulator = (function () {
                 var max = -Infinity;
                 var winnerParty = "";
                 for (var party in diff) {
-                    if (diff[party] > max) {
-                        max = diff[party];
+                    if (diff[party] > max && (repcount[party] | 0) < e.districts.length) {
+                        max = diff[party] || 0;
                         winnerParty = party;
+                    }
+                }
+                if (winnerParty == "") {
+                    for (var party in diff) {
+                        if (diff[party] > max) {
+                            max = diff[party] || 0;
+                            winnerParty = party;
+                        }
                     }
                 }
                 // find rep
@@ -52,16 +60,15 @@ var Simulator = (function () {
                         alreadyMembers.add(rep.district);
                     }
                 }
-                var districtIndex = -1;
-                max = 0;
+                var districtIndex = "list";
+                max = -1;
                 for (var i = 0; i < e.districts.length; i++) {
                     var district = e.districts[i];
-                    if (district.voters[winnerParty] > max && !alreadyMembers.has(i)) {
+                    if ((district.voters[winnerParty] || 0) > max && !alreadyMembers.has(i)) {
                         max = district.voters[winnerParty];
                         districtIndex = i;
                     }
                 }
-                // TODO: If districtIndex == -1, go to next party
                 reps.push({ party: winnerParty, district: districtIndex, primary: false });
                 repcount[winnerParty] = (repcount[winnerParty] | 0) + 1;
             }

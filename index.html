@@ -101,7 +101,7 @@ button:active {
 	padding: 16px;
 
 	display: grid;
-	grid-template-rows: 1fr 1fr auto;
+	grid-template-rows: auto 1fr auto;
 	grid-template-columns: 1fr 144px;
 }
 #legislature h4 {
@@ -308,7 +308,11 @@ function createRepElem(rep) {
 		green: "G",
 		liberal: "LB",
 		conservative: "C"
-	}[rep.party] + rep.district;
+	}[rep.party];
+
+	if (rep.district != "list") {
+		elem.innerHTML += rep.district;
+	}
 
 	let district = rep.district;
 	elem.onclick = function() {

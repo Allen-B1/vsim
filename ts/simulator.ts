@@ -68,10 +68,19 @@ const Simulator = (function() {
                 let max = -Infinity;
                 let winnerParty = "";
                 for (let party in diff) {
-                    if (diff[party] > max) {
-                        max = diff[party];
+                    if (diff[party] > max && (repcount[party]|0) < e.districts.length) {
+                        max = diff[party] || 0;
                         winnerParty = party;
                     }
+                }
+
+                if (winnerParty == "") {
+                    for (let party in diff) {
+                        if (diff[party] > max) {
+                            max = diff[party] || 0;
+                            winnerParty = party;
+                        }
+                    }  
                 }
 
                 // find rep
@@ -82,17 +91,16 @@ const Simulator = (function() {
                     }
                 }
 
-                let districtIndex = -1;
-                max = 0;
+                let districtIndex: number | "list" = "list";
+                max = -1;
                 for (let i = 0; i < e.districts.length; i++) {
                     let district = e.districts[i];
-                    if (district.voters[winnerParty] > max && !alreadyMembers.has(i)) {
+                    if ((district.voters[winnerParty] || 0) > max && !alreadyMembers.has(i)) {
                         max = district.voters[winnerParty];
                         districtIndex = i;
                     }
                 }
 
-                // TODO: If districtIndex == -1, go to next party
                 reps.push({party: winnerParty, district: districtIndex,primary:false});
                 repcount[winnerParty] = (repcount[winnerParty]|0)+1;
             }
