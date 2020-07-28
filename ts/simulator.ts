@@ -23,12 +23,12 @@ interface VotingMethod {
 }
 
 const Simulator = (function() {
-    function randg(): number {
+    function randg(it: number): number {
         var rand = 0;
-        for (var i = 0; i < 6; i += 1) {
+        for (var i = 0; i < it; i += 1) {
         rand += Math.random();
         }
-        return rand / 6;
+        return rand / it;
     }
 
     const FPTP: VotingMethod = {
@@ -162,7 +162,7 @@ const Simulator = (function() {
                 var left = (Math.random() * 0.6 + 0.2) * (1-lib);
                 var right = 1-lib-left;
 
-                var green = (randg()*0.6) * left;
+                var green = (randg(2)*0.6) * left;
                 var labor = left-green;
 
                 district.voters["labour"] = labor;

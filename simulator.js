@@ -1,10 +1,10 @@
 var Simulator = (function () {
-    function randg() {
+    function randg(it) {
         var rand = 0;
-        for (var i = 0; i < 6; i += 1) {
+        for (var i = 0; i < it; i += 1) {
             rand += Math.random();
         }
-        return rand / 6;
+        return rand / it;
     }
     var FPTP = {
         execute: function (e) {
@@ -123,9 +123,9 @@ var Simulator = (function () {
                     voters: {}
                 };
                 var lib = Math.random() * 0.3 + 0.05;
-                var left = (Math.random() * 0.6 + 0.2) * (1 - lib);
+                var left = (Math.random() * 0.8 + 0.2) * (1 - lib);
                 var right = 1 - lib - left;
-                var green = (randg() * 0.6) * left;
+                var green = (randg(2) * 0.6) * left;
                 var labor = left - green;
                 district.voters["labour"] = labor;
                 district.voters["conservative"] = right;
