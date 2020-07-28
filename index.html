@@ -547,6 +547,9 @@ function updateSliders() {
 	if (+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value > 1) {
 		liberalSlider.value = 1 - greenSlider.value - conservativeSlider.value - labourSlider.value;
 	}
+	if (+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value > 1) {
+		labourSlider.value = 1 - greenSlider.value - conservativeSlider.value - liberalSlider.value;
+	}
 }
 
 greenSlider.oninput = updateSliders;
