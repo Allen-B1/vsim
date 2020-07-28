@@ -305,7 +305,7 @@ function createDistrictElem(districts, firstId) {
 		conservative: 200
 	}[winner];
 
-	let sat = votes[winner] * votes[winner] * 1.5;
+	let sat = votes[winner] * votes[winner] * 2;
 	if (sat > 1) sat = 1;
 	let hsl = hsv_to_hsl(hue, sat, 1);
 	elem.style.backgroundColor = "hsl(" + hsl[0] + "," + (hsl[1] * 100) + "%," + (hsl[2]*100) + "%)";
