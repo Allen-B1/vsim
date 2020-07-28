@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Simulator</title>
+		<title>Elections</title>
 		<style>
 body {
 	background: #fff;
@@ -221,7 +221,7 @@ button:active {
 		<main>
 			<section id="electorate">
 				<div id="electorate-map">
-					<h2>Everylandia</h2>
+					<h2 id="country">Normalia</h2>
 					<div id="map-container">
 						<div></div>
 						<div id="map">
@@ -422,6 +422,12 @@ function applyElectorate(electorate, shape) {
 	chart1.data = chartData(totalVotes);
 	chart1.config.options.title.text = "National";
 	chart1.update();
+
+	if (totalVotes.labour >= 0.99) {
+		document.getElementById("country").innerHTML = "China";
+	} else {
+		document.getElementById("country").innerHTML = "Normalia";
+	}
 }
 
 function applyResults(results) {
