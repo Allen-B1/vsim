@@ -260,24 +260,37 @@ const Simulator = (function() {
     }
 
     return {
-        generate: function(districts: number): Electorate {
-            var districtlist: District[] = []
-            for (let i = 0; i < districts; i++) {
+        generate: function(probabilities: {[party: string]: number}): Electorate {
+            let ranges = {};
+            let current = 0;
+            for (let party in probabilities) {
+                ranges[party] = [current, current+probabilities[party]];
+                current += probabilities[party];
+            }
+
+            var districtlist: District[] = [];
+            for (let i = 0; i < 36; i++) {
+
                 var district: District = {
                     voters: {}
                 };
 
-                var lib = Math.random() * 0.3 + 0.05;
-                var left = (Math.random() * 0.6 + 0.2) * (1-lib);
-                var right = 1-lib-left;
+                let voters = {};
+                voterloop: for (let i = 0; i < 25; i++) {
+                    let n = Math.random();
+                    for (let party in ranges) {
+                        if (ranges[party][0] <= n && n < ranges[party][1]) {
+                            voters[party] = (voters[party] | 0) + 1;
+                            continue voterloop;
+                        }
+                    }
 
-                var green = (randg(2)*0.6) * left;
-                var labor = left-green;
+                    i--;
+                }
 
-                district.voters["labour"] = labor;
-                district.voters["conservative"] = right;
-                district.voters["liberal"] = lib;
-                district.voters["green"] = green;
+                for (let party in voters) {
+                    district.voters[party] = voters[party] / 25;                    
+                }
                 districtlist.push(district);
             }
 

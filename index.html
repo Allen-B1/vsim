@@ -16,12 +16,16 @@ h5 {
 }
 
 main {
-	display: flex; 
-	flex-direction: row;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+}
+
+#section-election {
+	grid-column: 1 / span 2;
+	grid-row: 1;
 }
 
 #electorate {
-	flex-grow: 1;
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	grid-template-rows: 1fr auto;
@@ -66,8 +70,7 @@ main {
 
 #section-results {
 	display: flex;
-	flex-direction: column;
-	width: 50%; }
+	flex-direction: column; }
 #results-header {
 	display: flex;
 	flex-direction: row;
@@ -85,7 +88,10 @@ button {
 	padding: 4px 8px;
 	font-size: 16px;
 }
-button.active-method {
+button:active {
+	background: #ddd;
+}
+#voting-methods button.active-method {
 	background: #ddd;
 }
 
@@ -156,20 +162,62 @@ button.active-method {
 
 
 .rep-labour {
-	background:#F15959;
-	border-color: #F15959 }
+	background:hsl(0, 100%, 65%);
+	border-color: hsl(0, 100%, 65%) }
 .rep-conservative {
-	background: #59BFF1;
-	border-color: #59BFF1; }
+	background: hsl(200, 100%, 65%);
+	border-color: hsl(200, 100%, 65%) }
 .rep-liberal {
-	background: #F1D859;
-	border-color: #F1D859 }
+	background: hsl(50, 100%, 65%);
+	border-color: hsl(50, 100%, 65%) }
 .rep-green {
-	background: #8CF159;
-	border-color:#8CF159; }
+	background: hsl(100, 100%, 65%);
+	border-color:hsl(100, 100%, 65%); }
+
+.text-conservative {
+	color: hsl(200, 100%, 45%); }
+.text-liberal {
+	color: hsl(50, 100%, 45%); }
+.text-labour {
+	color: hsl(0, 100%, 45%); }
+.text-green {
+	color:hsl(100, 100%, 45%) }
+
+#section-election {
+	width: 200px;
+	padding: 16px;
+	background: #eee;
+	text-align: center;
+	position: fixed;
+	left: 16px;
+	bottom: 16px;
+}
+.per-cnt {
+	display: flex; }
+.per-cnt span {
+	flex-grow: 1;
+	text-align: right;
+	padding: 0 8px;
+	display: inline-block; }
+#section-election button {
+	background: #eee;
+	border-color: #eee;
+	margin: auto; 
+	margin-top: 8px; }
+#section-election button:active {
+	background: #ddd; }
+
 		</style>
 	</head>
 	<body>
+		<section id="section-election">
+			<div class="per-cnt text-conservative"><span>C</span> <input disabled type="range" min="0" max="1" step="0.1" value="0.4" id="per-conservative"></div>
+			<div class="per-cnt text-liberal"><span>LB</span> <input type="range" min="0" max="1" step="0.1" value="0.2" id="per-liberal"></div>
+			<div class="per-cnt text-labour"><span>L</span> <input type="range" min="0" max="1" step="0.1" value="0.3" id="per-labour"></div>
+			<div class="per-cnt text-green"><span>G</span> <input type="range" min="0" max="1" step="0.1" value="0.1" id="per-green"></div>
+
+			<button id="new-election">New Election</button>
+		</section>
 		<main>
 			<section id="electorate">
 				<div id="electorate-map">
@@ -440,7 +488,12 @@ function applyResults(results) {
 	document.getElementById("legislature-title").innerHTML = government.map((party) => labels[party]).join("-") + " Government";
 }
 
-let electorate = Simulator.generate(36);
+let electorate = Simulator.generate({
+	labour: 0.3,
+	green: 0.1,
+	liberal: 0.2,
+	conservative: 0.4
+});
 let results = Simulator.FPTP.execute(electorate);
 applyElectorate(electorate, Simulator.FPTP.groupings(electorate));
 applyResults(results);
@@ -471,6 +524,35 @@ document.getElementById("stv").onclick = function() {
 	changeMethod(Simulator.STV);
 	this.classList.add("active-method");
 }
+
+const greenSlider = document.getElementById("per-green"),
+	labourSlider = document.getElementById("per-labour"),
+	liberalSlider = document.getElementById("per-liberal"),
+	conservativeSlider = document.getElementById("per-conservative");
+function updateSliders() {
+	conservativeSlider.value = 1 - greenSlider.value - labourSlider.value - liberalSlider.value;
+	if (+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value > 1) {
+		liberalSlider.value = 1 - greenSlider.value - conservativeSlider.value - labourSlider.value;
+	}
+}
+
+greenSlider.oninput = updateSliders;
+liberalSlider.oninput = updateSliders;
+labourSlider.oninput = updateSliders;
+
+document.getElementById("new-election").onclick = function() {
+	electorate = Simulator.generate({
+		labour: +labourSlider.value,
+		green: +greenSlider.value,
+		liberal: +liberalSlider.value,
+		conservative: +conservativeSlider.value
+	});
+	applyElectorate(electorate, Simulator.FPTP.groupings(electorate));
+	let results = Simulator.FPTP.execute(electorate);
+	applyResults(results);
+	document.querySelector(".active-method").classList.remove('active-method');
+	document.getElementById("fptp").classList.add("active-method");
+};
 		</script>
 	</body>
 </html>

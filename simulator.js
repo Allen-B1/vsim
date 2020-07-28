@@ -213,21 +213,32 @@ var Simulator = (function () {
         }
     };
     return {
-        generate: function (districts) {
+        generate: function (probabilities) {
+            var ranges = {};
+            var current = 0;
+            for (var party in probabilities) {
+                ranges[party] = [current, current + probabilities[party]];
+                current += probabilities[party];
+            }
             var districtlist = [];
-            for (var i = 0; i < districts; i++) {
+            for (var i = 0; i < 36; i++) {
                 var district = {
                     voters: {}
                 };
-                var lib = Math.random() * 0.3 + 0.05;
-                var left = (Math.random() * 0.6 + 0.2) * (1 - lib);
-                var right = 1 - lib - left;
-                var green = (randg(2) * 0.6) * left;
-                var labor = left - green;
-                district.voters["labour"] = labor;
-                district.voters["conservative"] = right;
-                district.voters["liberal"] = lib;
-                district.voters["green"] = green;
+                var voters = {};
+                voterloop: for (var i_1 = 0; i_1 < 25; i_1++) {
+                    var n = Math.random();
+                    for (var party in ranges) {
+                        if (ranges[party][0] <= n && n < ranges[party][1]) {
+                            voters[party] = (voters[party] | 0) + 1;
+                            continue voterloop;
+                        }
+                    }
+                    i_1--;
+                }
+                for (var party in voters) {
+                    district.voters[party] = voters[party] / 25;
+                }
                 districtlist.push(district);
             }
             return {
