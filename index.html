@@ -62,7 +62,7 @@ main {
 	background: #ddd;
 }
 .district:focus {
-	border: 4px solid #000;
+	border: 4px solid #000 !important
 	outline: 0;
 }
 
@@ -155,16 +155,16 @@ button.active-method {
 }
 
 
-.plurality-labour, .rep-labour {
+.rep-labour {
 	background:#F15959;
 	border-color: #F15959 }
-.plurality-conservative, .rep-conservative {
+.rep-conservative {
 	background: #59BFF1;
 	border-color: #59BFF1; }
-.plurality-liberal, .rep-liberal {
+.rep-liberal {
 	background: #F1D859;
 	border-color: #F1D859 }
-.plurality-green, .rep-green {
+.rep-green {
 	background: #8CF159;
 	border-color:#8CF159; }
 		</style>
@@ -271,6 +271,22 @@ function createRepElem(rep) {
 	return elem;
 }
 
+function hsv_to_hsl(h, s, v) {
+    var l = (2 - s) * v / 2;
+
+    if (l != 0) {
+        if (l == 1) {
+            s = 0
+        } else if (l < 0.5) {
+            s = s * v / (l * 2)
+        } else {
+            s = s * v / (2 - l * 2)
+        }
+    }
+
+    return [h, s, l]
+}
+
 function createDistrictElem(districts, firstId) {
 	var elem = document.createElement("div");
 	elem.className = "district";
@@ -280,9 +296,20 @@ function createDistrictElem(districts, firstId) {
 		elem.classList.add("district-" + id);
 	}
 
-	if (districts.length == 1) {
-		elem.classList.add("plurality-" + Simulator.getPluralities(districts[0].voters)[0]);
-	}
+	let votes = Simulator.getTotalVotes(districts);
+	let winner = Simulator.getPluralities(votes)[0]
+	let hue = {
+		labour: 0,
+		liberal: 50,
+		green: 100,
+		conservative: 200
+	}[winner];
+
+	let sat = Math.pow(votes[winner], 1.5);
+	let hsl = hsv_to_hsl(hue, sat, 1);
+	elem.style.backgroundColor = "hsl(" + hsl[0] + "," + (hsl[1] * 100) + "%," + (hsl[2]*100) + "%)";
+	elem.style.borderColor = elem.style.backgroundColor;
+
 	elem.tabIndex = "-1";
 	return elem;
 }
