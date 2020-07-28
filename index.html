@@ -283,8 +283,8 @@ function chartData(votes) {
 	return {
 		labels: ["Green", "Labour", "Liberal", "Conservative"],
 		datasets: [{
-			data: [votes.labour, votes.conservative, votes.liberal, votes.green],
-			backgroundColor: ["#F15959", "#59BFF1", "#F1D859", "#8CF159"]
+			data: [votes.green, votes.labour, votes.liberal, votes.conservative],
+			backgroundColor: ["#8CF159", "#F15959", "#F1D859","#59BFF1"]
 		}],
 	}
 }
