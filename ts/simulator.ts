@@ -260,7 +260,7 @@ const Simulator = (function() {
     }
 
     return {
-        generate: function(probabilities: {[party: string]: number}): Electorate {
+        generate: function(reps: number, probabilities: {[party: string]: number}): Electorate {
             let ranges = {};
             let current = 0;
             for (let party in probabilities) {
@@ -269,7 +269,7 @@ const Simulator = (function() {
             }
 
             var districtlist: District[] = [];
-            for (let i = 0; i < 36; i++) {
+            for (let i = 0; i < reps; i++) {
 
                 var district: District = {
                     voters: {}

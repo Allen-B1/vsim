@@ -213,7 +213,7 @@ var Simulator = (function () {
         }
     };
     return {
-        generate: function (probabilities) {
+        generate: function (reps, probabilities) {
             var ranges = {};
             var current = 0;
             for (var party in probabilities) {
@@ -221,7 +221,7 @@ var Simulator = (function () {
                 current += probabilities[party];
             }
             var districtlist = [];
-            for (var i = 0; i < 36; i++) {
+            for (var i = 0; i < reps; i++) {
                 var district = {
                     voters: {}
                 };

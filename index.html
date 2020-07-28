@@ -47,12 +47,12 @@ main {
 	position: relative;
 	margin: auto; }
 #map-container > :first-child {
-	padding-bottom: 100%; }
+	padding-bottom: 66.66%; }
 
 #map {
 	background: #fff;
 	display: grid;
-	grid-template-rows: repeat(6, 1fr);
+	grid-template-rows: repeat(4, 1fr);
 	grid-template-columns: repeat(6, 1fr);
 
 	position: absolute;
@@ -488,7 +488,7 @@ function applyResults(results) {
 	document.getElementById("legislature-title").innerHTML = government.map((party) => labels[party]).join("-") + " Government";
 }
 
-let electorate = Simulator.generate({
+let electorate = Simulator.generate(24, {
 	labour: 0.3,
 	green: 0.1,
 	liberal: 0.2,
@@ -541,7 +541,7 @@ liberalSlider.oninput = updateSliders;
 labourSlider.oninput = updateSliders;
 
 document.getElementById("new-election").onclick = function() {
-	electorate = Simulator.generate({
+	electorate = Simulator.generate(24, {
 		labour: +labourSlider.value,
 		green: +greenSlider.value,
 		liberal: +liberalSlider.value,
