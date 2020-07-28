@@ -13,7 +13,7 @@ interface Electorate {
 interface Rep {
     party: string,
     district: number | "list",
-    geographic: boolean
+    primary: boolean
 }
 
 type Results = Rep[];
@@ -37,7 +37,7 @@ const Simulator = (function() {
             let reps: Results = [];
             for (let i = 0; i < e.districts.length; i++) {
                 let winner = Simulator.getPluralities(e.districts[i].voters)[0];
-                reps.push({party: winner, district: i, geographic:true});
+                reps.push({party: winner, district: i, primary:true});
             }
             return reps;
         },
@@ -46,17 +46,17 @@ const Simulator = (function() {
         } 
     };
 
-    const MMP_BNW: VotingMethod = {
+    const NW_MMP: VotingMethod = {
         execute: function(e: Electorate): Results {
             let reps: Results = [];
             let repcount = {};
             for (let i = 0; i < e.districts.length; i++) {
                 let winner = Simulator.getPluralities(e.districts[i].voters)[0];
-                reps.push({party: winner, district: i, geographic:true});
+                reps.push({party: winner, district: i, primary:true});
                 repcount[winner] = (repcount[winner]|0)+1;
             }
 
-            let votes = Simulator.getTotalVotes(e);
+            let votes = Simulator.getTotalVotes(e.districts);
 
             while (reps.length < e.districts.length * 2) {
                 // amount underrepresented
@@ -93,7 +93,7 @@ const Simulator = (function() {
                 }
 
                 // TODO: If districtIndex == -1, go to next party
-                reps.push({party: winnerParty, district: districtIndex,geographic:false});
+                reps.push({party: winnerParty, district: districtIndex,primary:false});
                 repcount[winnerParty] = (repcount[winnerParty]|0)+1;
             }
             return reps;
@@ -115,41 +115,149 @@ const Simulator = (function() {
             let reps: Results = [];
             let irvotes = {};
             for (let i = 0; i < e.districts.length; i++) {
-                let votes = e.districts[i].voters;
-                Object.assign(irvotes, votes);
-                let winner = "";
-                console.log(i);
-                for (let j = 0; j < 20; j++) {
-                    let order = Simulator.getPluralities(irvotes);
-                    console.log(order);
-                    if (order.length == 1) {
-                        winner = order[0];
-                        break;
-                    }
-
-                    // Eliminate lowest vote %
-                    let loser = order[order.length - 1];
-                    delete irvotes[loser];
-                    order = order.slice(0, -1);
-
-                    // Recalculate irvotes
-                    irvotes = {};
-                    for (let party in choices) {
-                        for (let choice of choices[party]) {
-                            if (order.indexOf(choice) != -1) {
-                                irvotes[choice] = (irvotes[choice] || 0) + votes[party];
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                reps.push({party:winner, district: i, geographic:true});
+                let winner = irvRun(1, e.districts[i].voters)[0];
+                reps.push({party:winner, district: i, primary:true});
             }
             return reps;
         },
         groupings: FPTP.groupings
     };
+
+    function irvCalculatePrimary(irvotes: {[ranking: string]: number}): Votes {
+        let votes: Votes = {};
+        for (let ranking in irvotes) {
+            let primary = ranking.split(",")[0];
+            votes[primary] = (votes[primary] || 0) + irvotes[ranking];
+        }
+        return votes;
+    }
+
+    function irvRun(reps: number, votes: Votes): string[] {
+        let threshold = 1 / (reps + 1);
+        const choices = {
+            labour: ["labour", "green", "liberal"],
+            green: ["green", "labour", "liberal"],
+            conservative: ["conservative", "liberal", "green"]
+        };
+
+        let irvotes = {};
+        for (let party in votes) {
+            let rank = "";
+            if (party in choices) {
+                rank = choices[party].map(c => (c+",").repeat(reps)).join("");
+            } else {
+                rank = (party+",").repeat(reps);
+            }
+            irvotes[rank] = votes[party];
+        }
+
+        let winners = [];
+
+        for (let j = 0; j < 50; j++) {
+            // Winners
+            let foundWinner = false;
+            // Keep finding winners & rolling over until no more winners.
+            for(let k = 0; k < 10; k++) {
+                let primaryVotes = irvCalculatePrimary(irvotes);
+                for (let party in primaryVotes) {
+                    // If they crossed the winning threshold,
+                    // add them to the winner list & rollover votes.
+                    if (primaryVotes[party] > threshold) {
+                        winners.push(party);
+                        foundWinner = true;
+
+                        // Rollover votes
+                        let fraction = (primaryVotes[party] - threshold) / primaryVotes[party];
+                        for (let ranking in irvotes) {
+                            // If ranking has one as primary vote
+                            // rollover fraction to next vote.
+                            if (ranking.split(",")[0] == party) {
+                                let newR = ranking.split(",").slice(1).join(",");
+                                irvotes[newR] = (irvotes[newR] || 0) + irvotes[ranking] * fraction;
+                                delete irvotes[ranking];
+                            }
+                        }
+
+                        break;
+                    }
+                }
+
+                if (!foundWinner) break;
+            }
+
+            if (winners.length >= reps) break;
+
+            let primaryVotes = irvCalculatePrimary(irvotes);
+            let order = Simulator.getPluralities(primaryVotes);
+
+            if (order.length + winners.length <= reps) {
+                winners.push(...order);
+                break;
+            }
+
+            // Eliminate lowest-ranked party
+            let loser = order[order.length - 1];
+            // Transfer votes to next choice
+            for (let ranking in irvotes) {
+                if (ranking.split(",")[0] == loser) {
+                    let newR = ranking.split(",").slice(1).join(",");
+                    irvotes[newR] = (irvotes[newR] || 0) + irvotes[ranking];
+                    delete irvotes[ranking];
+                }
+            }
+        }
+
+        return winners;
+    }
+
+    const STV: VotingMethod = {
+        execute: function(e: Electorate): Results {
+            let choices = {
+                labour: ["labour", "green", "liberal"],
+                green: ["green", "labour", "liberal"],
+                conservative: ["conservative", "liberal", "labour"],
+                liberal: ["liberal"]
+            };
+
+            let reps: Results = [];
+            let startId = 0;
+            let groupings = STV.groupings(e);
+            for (let size of groupings) {
+                let districts = e.districts.slice(startId, startId+size);
+                let votes = Simulator.getTotalVotes(districts)
+                console.log(startId);
+                let winners = irvRun(size, votes);
+                
+
+                let count = {};
+                for (let winner of winners) {
+                    reps.push({party: winner, district: startId+(count[winner]||0), primary: true});
+
+                    count[winner] = (count[winner] || 0) + 1;
+                }
+
+                startId += size;
+            }
+            return reps;
+        },
+        groupings: function(e: Electorate): number[] {
+            let out = [];
+            let i = 0;
+            if (e.districts.length > 6) {
+                out.push(6);
+                i += 6;
+            }
+            for (; i < e.districts.length; i += 3) {
+                if (i + 3 >= e.districts.length) {
+                    out.push(e.districts.length - i);
+                    break;
+                } else {
+                    out.push(3);
+                }
+            }
+            return out;
+        }
+    }
 
     return {
         generate: function(districts: number): Electorate {
@@ -178,12 +286,12 @@ const Simulator = (function() {
             };
         },
 
-        getTotalVotes: function(electorate: Electorate): Votes {
+        getTotalVotes: function(d: District[]): Votes {
             var m = {};
-            for (let district of electorate.districts) {
+            for (let district of d) {
                 for (let party in district.voters) {
                     if (typeof district.voters[party] == "number") {
-                        m[party] = (m[party] || 0) + district.voters[party] / electorate.districts.length;
+                        m[party] = (m[party] || 0) + district.voters[party] / d.length;
                     }
                 }
             }
@@ -204,7 +312,8 @@ const Simulator = (function() {
         },
 
         FPTP: FPTP,
-        MMP_BNW: MMP_BNW,
+        NW_MMP: NW_MMP,
         IRV: IRV,
+        STV: STV,
     }
 })();

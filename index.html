@@ -150,7 +150,7 @@ button.active-method {
 .rep.active {
 	border: 4px solid #aaa;
 }
-.rep.geographic.active {
+.rep.primary.active {
 	border: 4px solid #000;
 }
 
@@ -193,8 +193,9 @@ button.active-method {
 				<div id="results-header">
 					<div id="voting-methods">
 						<button id="fptp" class="active-method">FPTP</button>
-						<button id="mmp-bnw">MMP-BNW</button>
+						<button id="nw-mmp">NW-MMP</button>
 						<button id="irv">IRV</button>
+						<button id="stv">STV</button>
 					</div>
 					<canvas id="chart2" width="128" height="128"></canvas>
 				</div>
@@ -250,8 +251,8 @@ function createRepElem(rep) {
 	elem.classList.add("rep-" + rep.party);
 	elem.classList.add("rep-district-" + rep.district);
 
-	if (rep.geographic) {
-		elem.classList.add("geographic");
+	if (rep.primary) {
+		elem.classList.add("primary");
 	}
 
 	elem.innerHTML = {
@@ -261,20 +262,27 @@ function createRepElem(rep) {
 		conservative: "C"
 	}[rep.party] + rep.district;
 
+	let district = rep.district;
 	elem.onclick = function() {
-		document.getElementById("district-" + rep.district).focus();
+		document.getElementsByClassName("district-" + district)[0].focus();
+		console.log(district);
 	};
 
 	return elem;
 }
 
-function createDistrictElem(district, id) {
+function createDistrictElem(districts, firstId) {
 	var elem = document.createElement("div");
 	elem.className = "district";
-	elem.id = "district-" + id;
 	elem.width = 64 + "px";
-	elem.style.gridColumnEnd = "span 1";
-	elem.classList.add("plurality-" + Simulator.getPluralities(district.voters)[0])
+	elem.style.gridColumnEnd = "span " + districts.length;
+	for (let id = firstId; id < firstId + districts.length; id++) {
+		elem.classList.add("district-" + id);
+	}
+
+	if (districts.length == 1) {
+		elem.classList.add("plurality-" + Simulator.getPluralities(districts[0].voters)[0]);
+	}
 	elem.tabIndex = "-1";
 	return elem;
 }
@@ -289,17 +297,30 @@ function chartData(votes) {
 	}
 }
 
-function applyElectorate(electorate) {
-	for (let i = 0; i < electorate.districts.length; i++) {
-		var elem = createDistrictElem(electorate.districts[i], i);
+function applyElectorate(electorate, shape) {
+	mapElem.innerHTML = "";
+	let i = 0;
+	for (let size of shape) {
+		// i = first district
+		// ids = list of districts
+
+		let ids = [];
+		for (let j = i; j < i + size; j++) {
+			ids.push(j);
+		}
+		let districts = electorate.districts.slice(i, i+size);
+		const elem = createDistrictElem(districts, ids[0]);
 		elem.onfocus = function() {
-			chart3.data = chartData(electorate.districts[i].voters)
-			chart3.config.options.title.text =  "District " + i;
+			chart3.data = chartData(Simulator.getTotalVotes(districts))
+			chart3.config.options.title.text =  "District " + ids.join("-");
 			chart3.update();
 			document.getElementById("district").style.opacity = 1;
-			let reps = document.getElementsByClassName("rep-district-" + i);
-			for (let rep of reps) {
-				rep.classList.add("active");
+
+			for (let id of ids) {
+				let reps = document.getElementsByClassName("rep-district-" + id);
+				for (let rep of reps) {
+					rep.classList.add("active");
+				}
 			}
 		};
 		elem.onblur = function() {
@@ -313,9 +334,11 @@ function applyElectorate(electorate) {
 			}
 		}
 		mapElem.appendChild(elem);
+
+		i += size;
 	}
 
-	var totalVotes = Simulator.getTotalVotes(electorate);
+	var totalVotes = Simulator.getTotalVotes(electorate.districts);
 	chart1.data = chartData(totalVotes);
 	chart1.config.options.title.text = "National";
 	chart1.update();
@@ -391,27 +414,33 @@ function applyResults(results) {
 
 let electorate = Simulator.generate(36);
 let results = Simulator.FPTP.execute(electorate);
-applyElectorate(electorate);
+applyElectorate(electorate, Simulator.FPTP.groupings(electorate));
 applyResults(results);
 
-document.getElementById("fptp").onclick = function() {
-	results = Simulator.FPTP.execute(electorate);
+function changeMethod(method) {
+	results = method.execute(electorate);
+	applyElectorate(electorate, method.groupings(electorate));
 	applyResults(results);
-	document.querySelector(".active-method").classList.remove("active-method");
+	let m = document.querySelector(".active-method");
+	if(m) m.classList.remove("active-method");	
+}
+
+document.getElementById("fptp").onclick = function() {
+	changeMethod(Simulator.FPTP);
 	this.classList.add("active-method");
 }
 
-document.getElementById("mmp-bnw").onclick = function() {
-	results = Simulator.MMP_BNW.execute(electorate);
-	applyResults(results);
-	document.querySelector(".active-method").classList.remove("active-method");
+document.getElementById("nw-mmp").onclick = function() {
+	changeMethod(Simulator.NW_MMP);
 	this.classList.add("active-method");
 }
 
 document.getElementById("irv").onclick = function() {
-	results = Simulator.IRV.execute(electorate);
-	applyResults(results);
-	document.querySelector(".active-method").classList.remove("active-method");
+	changeMethod(Simulator.IRV);
+	this.classList.add("active-method");
+}
+document.getElementById("stv").onclick = function() {
+	changeMethod(Simulator.STV);
 	this.classList.add("active-method");
 }
 		</script>
