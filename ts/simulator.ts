@@ -13,6 +13,7 @@ interface Electorate {
 interface Rep {
     party: string,
     district: number | "list",
+    geographic: boolean
 }
 
 type Results = Rep[];
@@ -36,7 +37,7 @@ const Simulator = (function() {
             let reps: Results = [];
             for (let i = 0; i < e.districts.length; i++) {
                 let winner = Simulator.getPluralities(e.districts[i].voters)[0];
-                reps.push({party: winner, district: i});
+                reps.push({party: winner, district: i, geographic:true});
             }
             return reps;
         },
@@ -51,7 +52,7 @@ const Simulator = (function() {
             let repcount = {};
             for (let i = 0; i < e.districts.length; i++) {
                 let winner = Simulator.getPluralities(e.districts[i].voters)[0];
-                reps.push({party: winner, district: i});
+                reps.push({party: winner, district: i, geographic:true});
                 repcount[winner] = (repcount[winner]|0)+1;
             }
 
@@ -92,7 +93,7 @@ const Simulator = (function() {
                 }
 
                 // TODO: If districtIndex == -1, go to next party
-                reps.push({party: winnerParty, district: districtIndex});
+                reps.push({party: winnerParty, district: districtIndex,geographic:false});
                 repcount[winnerParty] = (repcount[winnerParty]|0)+1;
             }
             return reps;
@@ -143,7 +144,7 @@ const Simulator = (function() {
                     }
                 }
 
-                reps.push({party:winner, district: i});
+                reps.push({party:winner, district: i, geographic:true});
             }
             return reps;
         },

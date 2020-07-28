@@ -62,7 +62,7 @@ main {
 	background: #ddd;
 }
 .district:focus {
-	border: 4px solid #888;
+	border: 4px solid #000;
 	outline: 0;
 }
 
@@ -147,9 +147,11 @@ button.active-method {
 	margin: 4px;
 	border: 4px solid;
 }
-
 .rep.active {
-	border: 4px solid #888;
+	border: 4px solid #aaa;
+}
+.rep.geographic.active {
+	border: 4px solid #000;
 }
 
 
@@ -247,6 +249,10 @@ function createRepElem(rep) {
 	elem.classList.add("rep");
 	elem.classList.add("rep-" + rep.party);
 	elem.classList.add("rep-district-" + rep.district);
+
+	if (rep.geographic) {
+		elem.classList.add("geographic");
+	}
 
 	elem.innerHTML = {
 		labour: "L",

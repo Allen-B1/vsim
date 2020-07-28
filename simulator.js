@@ -11,7 +11,7 @@ var Simulator = (function () {
             var reps = [];
             for (var i = 0; i < e.districts.length; i++) {
                 var winner = Simulator.getPluralities(e.districts[i].voters)[0];
-                reps.push({ party: winner, district: i });
+                reps.push({ party: winner, district: i, geographic: true });
             }
             return reps;
         },
@@ -25,7 +25,7 @@ var Simulator = (function () {
             var repcount = {};
             for (var i = 0; i < e.districts.length; i++) {
                 var winner = Simulator.getPluralities(e.districts[i].voters)[0];
-                reps.push({ party: winner, district: i });
+                reps.push({ party: winner, district: i, geographic: true });
                 repcount[winner] = (repcount[winner] | 0) + 1;
             }
             var votes = Simulator.getTotalVotes(e);
@@ -62,7 +62,7 @@ var Simulator = (function () {
                     }
                 }
                 // TODO: If districtIndex == -1, go to next party
-                reps.push({ party: winnerParty, district: districtIndex });
+                reps.push({ party: winnerParty, district: districtIndex, geographic: false });
                 repcount[winnerParty] = (repcount[winnerParty] | 0) + 1;
             }
             return reps;
@@ -109,7 +109,7 @@ var Simulator = (function () {
                         }
                     }
                 }
-                reps.push({ party: winner, district: i });
+                reps.push({ party: winner, district: i, geographic: true });
             }
             return reps;
         },
