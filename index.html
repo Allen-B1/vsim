@@ -28,7 +28,7 @@ main {
 #electorate {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	grid-template-rows: 1fr auto;
+	grid-template-rows: 1fr 138px;
 }
 #electorate-map {
 	grid-row: 1;
@@ -102,7 +102,7 @@ button:active {
 
 	display: grid;
 	grid-template-rows: auto 1fr auto;
-	grid-template-columns: 1fr 144px;
+	grid-template-columns: 1fr max-width;
 }
 #legislature h4 {
 	grid-row: 3;
@@ -115,20 +115,21 @@ button:active {
 	grid-column: 1;
 	align-items: flex-end;
 	align-content: flex-end;
-	justify-content: flex-start;
-	margin-top: 8px; }
+	justify-content: flex-start; }
 #legislature-opposition {
 	grid-row: 1;
 	grid-column: 1;
 	align-items: flex-start;
 	align-content: flex-end;
 	justify-content: flex-start;
-	flex-wrap: wrap-reverse !important; }
+	flex-wrap: wrap-reverse !important;
+	padding-bottom: 24px; }
 #legislature-crossbench {
 	grid-row: 1 / span 2;
 	grid-column: 2;
 
 	align-self: center;
+	justify-self: flex-end;
 
 	max-height: 384px;
 
@@ -136,11 +137,18 @@ button:active {
 	flex-direction: row-reverse;
 	flex-wrap: wrap-reverse;
 	justify-content: flex-start;
-	align-content: flex-end; }
+	align-content: flex-end;
+	padding-left: 8px;
+	max-width: 96px; }
 
 #legislature-government, #legislature-opposition {
 	display: flex;
 	flex-wrap: wrap;
+}
+
+#legislature-opposition:empty, #legislature-crossbench:empty {
+	padding: 0;
+	display: none;
 }
 
 .rep {
