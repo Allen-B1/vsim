@@ -92,7 +92,6 @@ function createRepElem(rep) {
 	let district = rep.district;
 	elem.onclick = function() {
 		document.getElementsByClassName("district-" + district)[0].focus();
-		console.log(district);
 	};
 
 	return elem;
@@ -187,7 +186,6 @@ function applyElectorate(electorate, shape) {
 				if (ids.indexOf(rep.district) == -1) continue;
 				if (rep.primary) {
 					repcount[rep.party] = (repcount[rep.party] | 0) + 1;
-					console.log(rep);
 				}
 			}
 			districtRepsBar.setData(...barData(repcount));
@@ -283,7 +281,6 @@ function applyResults(results) {
 
 	let govSeats = government.reduce((acc, party) => acc + repcount[party], 0);
 	let minority = (govSeats * 2) < results.length;
-	console.log(govSeats + "/" + results.length + " = " + minority);
 
 	document.getElementById("legislature-title").innerHTML = government.map((party) => labels[party]).join("-") + (minority?" Minority":" Majority") + " Government";
 }
@@ -346,8 +343,6 @@ function updateSliders() {
 	if (+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value + +socialistSlider.value > 1) {
 		greenSlider.value = 1 - labourSlider.value - conservativeSlider.value - liberalSlider.value - socialistSlider.value;
 	}
-
-	console.log(+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value + +socialistSlider.value);
 }
 
 greenSlider.oninput = updateSliders;

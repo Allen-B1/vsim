@@ -301,7 +301,7 @@ var Simulator = (function () {
                     voters: {}
                 };
                 var voters = {};
-                voterloop: for (var i_1 = 0; i_1 < 17; i_1++) {
+                voterloop: for (var i_1 = 0; i_1 < 11; i_1++) {
                     var n = Math.random();
                     for (var party in ranges) {
                         if (ranges[party][0] <= n && n < ranges[party][1]) {
@@ -311,8 +311,22 @@ var Simulator = (function () {
                     }
                     i_1--;
                 }
+                voterloop2: for (var i_2 = 0; i_2 < 11; i_2++) {
+                    var n = Math.random();
+                    for (var party in ranges) {
+                        if (ranges[party][0] <= n && n < ranges[party][1]) {
+                            voters[party] = (voters[party] | 0) + Math.random() * 0.2 + 0.2;
+                            continue voterloop2;
+                        }
+                    }
+                    i_2--;
+                }
+                var totalvotes = 0;
                 for (var party in voters) {
-                    district.voters[party] = voters[party] / 17;
+                    totalvotes += voters[party];
+                }
+                for (var party in voters) {
+                    district.voters[party] = voters[party] / totalvotes;
                 }
                 districtlist.push(district);
             }

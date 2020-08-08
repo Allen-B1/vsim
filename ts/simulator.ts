@@ -221,7 +221,6 @@ const Simulator = (function() {
                 let votes = Simulator.getTotalVotes(districts)
                 let winners = irvRun(size, votes);
                 
-
                 let count = {};
                 for (let winner of winners) {
                     reps.push({party: winner, district: startId+(count[winner]||0), primary: true});
@@ -351,7 +350,7 @@ const Simulator = (function() {
                 };
 
                 let voters = {};
-                voterloop: for (let i = 0; i < 17; i++) {
+                voterloop: for (let i = 0; i < 11; i++) {
                     let n = Math.random();
                     for (let party in ranges) {
                         if (ranges[party][0] <= n && n < ranges[party][1]) {
@@ -363,8 +362,24 @@ const Simulator = (function() {
                     i--;
                 }
 
+                voterloop2: for (let i = 0; i < 11; i++) {
+                    let n = Math.random();
+                    for (let party in ranges) {
+                        if (ranges[party][0] <= n && n < ranges[party][1]) {
+                            voters[party] = (voters[party] | 0) + Math.random() * 0.2 + 0.2;
+                            continue voterloop2;
+                        }
+                    }
+
+                    i--;
+                }
+
+                let totalvotes = 0;
                 for (let party in voters) {
-                    district.voters[party] = voters[party] / 17;                    
+                    totalvotes += voters[party];
+                }
+                for (let party in voters) {
+                    district.voters[party] = voters[party] / totalvotes;                    
                 }
                 districtlist.push(district);
             }
