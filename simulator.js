@@ -31,23 +31,23 @@ var Simulator = (function () {
             var votes = Simulator.getTotalVotes(e.districts);
             while (reps.length < e.districts.length * 2) {
                 // amount underrepresented
-                var diff = {};
+                var quotients = {};
                 for (var party in votes) {
                     // goal - actual
-                    diff[party] = votes[party] - ((repcount[party] | 0) / reps.length);
+                    quotients[party] = votes[party] / ((repcount[party] | 0) + 1);
                 }
                 var max = -Infinity;
                 var winnerParty = "";
-                for (var party in diff) {
-                    if (diff[party] > max && (repcount[party] | 0) < e.districts.length) {
-                        max = diff[party] || 0;
+                for (var party in quotients) {
+                    if (quotients[party] > max && (repcount[party] | 0) < e.districts.length) {
+                        max = quotients[party] || 0;
                         winnerParty = party;
                     }
                 }
                 if (winnerParty == "") {
-                    for (var party in diff) {
-                        if (diff[party] > max) {
-                            max = diff[party] || 0;
+                    for (var party in quotients) {
+                        if (quotients[party] > max) {
+                            max = quotients[party] || 0;
                             winnerParty = party;
                         }
                     }
@@ -100,8 +100,8 @@ var Simulator = (function () {
         var choices = {
             labour: ["labour", "green", "liberal"],
             green: ["green", "labour", "liberal"],
-            conservative: ["conservative", "liberal", "green"],
-            socialist: ["socialist", "labour", "green"]
+            conservative: ["conservative", "liberal", "labour", "green"],
+            socialist: ["socialist", "green", "labour"]
         };
         var irvotes = {};
         for (var party in votes) {
@@ -197,13 +197,18 @@ var Simulator = (function () {
                 out.push(3);
                 i += 6;
             }
-            for (; i < e.districts.length; i += 6) {
-                if (i + 6 >= e.districts.length) {
+            if (e.districts.length > 6 * 3) {
+                out.push(6);
+                out.push(6);
+                i += 12;
+            }
+            for (; i < e.districts.length; i += 3) {
+                if (i + 3 >= e.districts.length) {
                     out.push(e.districts.length - i);
                     break;
                 }
                 else {
-                    out.push(6);
+                    out.push(3);
                 }
             }
             return out;
@@ -269,18 +274,18 @@ var Simulator = (function () {
         groupings: function (e) {
             var out = [];
             var i = 0;
-            if (e.districts.length > 12) {
+            if (e.districts.length > 18) {
                 out.push(6);
-                out.push(6);
-                i += 12;
+                out.push(12);
+                i += 18;
             }
-            for (; i < e.districts.length; i += 12) {
-                if (i + 12 >= e.districts.length) {
+            for (; i < e.districts.length; i += 6) {
+                if (i + 6 >= e.districts.length) {
                     out.push(e.districts.length - i);
                     break;
                 }
                 else {
-                    out.push(12);
+                    out.push(6);
                 }
             }
             return out;

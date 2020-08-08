@@ -41,9 +41,9 @@
 				<div id="results-header">
 					<div id="voting-methods">
 						<button id="fptp" class="active-method">FPTP</button>
-						<button id="nw-mmp">NW-MMP</button>
 						<button id="irv">IRV</button>
 						<button id="stv">STV</button>
+						<button id="nw-mmp">NW-MMP</button>
 						<button id="lo-pr">LO-PR</button>
 					</div>
 					<div id="legislature-bar" class="end"></div>
@@ -188,6 +188,7 @@ function applyElectorate(electorate, shape) {
 				if (ids.indexOf(rep.district) == -1) continue;
 				if (rep.primary) {
 					repcount[rep.party] = (repcount[rep.party] | 0) + 1;
+					console.log(rep);
 				}
 			}
 			districtRepsBar.setData(...barData(repcount));
@@ -207,7 +208,7 @@ function applyElectorate(electorate, shape) {
 	var totalVotes = Simulator.getTotalVotes(electorate.districts);
 	nationalBar.setData(...barData(totalVotes));
 
-	if (totalVotes.labour >= 0.99) {
+	if (totalVotes.labour >= 0.99 || totalVotes.socialist >= 0.99) {
 		document.getElementById("country").innerHTML = "China";
 	} else {
 		document.getElementById("country").innerHTML = "Map";
@@ -364,7 +365,7 @@ document.getElementById("new-election").onclick = function() {
 		socialist: +socialistSlider.value
 	});
 	applyElectorate(electorate, Simulator.FPTP.groupings(electorate));
-	let results = Simulator.FPTP.execute(electorate);
+	results = Simulator.FPTP.execute(electorate);
 	applyResults(results);
 	document.querySelector(".active-method").classList.remove('active-method');
 	document.getElementById("fptp").classList.add("active-method");
