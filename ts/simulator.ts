@@ -111,17 +111,7 @@ const Simulator = (function() {
 
     const IRV: VotingMethod = {
         execute: function(e: Electorate): Results {
-            // assume all voters vote the same way
-            // obv oversimplification but
-            let choices = {
-                labour: ["labour", "green", "liberal"],
-                green: ["green", "labour", "liberal"],
-                conservative: ["conservative", "liberal", "labour"],
-                liberal: ["liberal"]
-            };
-
             let reps: Results = [];
-            let irvotes = {};
             for (let i = 0; i < e.districts.length; i++) {
                 let winner = irvRun(1, e.districts[i].voters)[0];
                 reps.push({party:winner, district: i, primary:true});
@@ -145,7 +135,8 @@ const Simulator = (function() {
         const choices = {
             labour: ["labour", "green", "liberal"],
             green: ["green", "labour", "liberal"],
-            conservative: ["conservative", "liberal", "green"]
+            conservative: ["conservative", "liberal", "green"],
+            socialist: ["labour", "green"]
         };
 
         let irvotes = {};
@@ -221,13 +212,6 @@ const Simulator = (function() {
 
     const STV: VotingMethod = {
         execute: function(e: Electorate): Results {
-            let choices = {
-                labour: ["labour", "green", "liberal"],
-                green: ["green", "labour", "liberal"],
-                conservative: ["conservative", "liberal", "labour"],
-                liberal: ["liberal"]
-            };
-
             let reps: Results = [];
             let startId = 0;
             let groupings = STV.groupings(e);

@@ -11,6 +11,7 @@
 			<div class="per-cnt text-liberal"><span>LB</span> <input type="range" min="0" max="1" step="0.1" value="0.2" id="per-liberal"></div>
 			<div class="per-cnt text-labour"><span>L</span> <input type="range" min="0" max="1" step="0.1" value="0.3" id="per-labour"></div>
 			<div class="per-cnt text-green"><span>G</span> <input type="range" min="0" max="1" step="0.1" value="0.1" id="per-green"></div>
+			<div class="per-cnt text-socialist"><span>S</span> <input type="range" min="0" max="1" step="0.1" value="0.0" id="per-socialist"></div>
 
 			<button id="new-election">New Election</button>
 		</section>
@@ -80,7 +81,8 @@ function createRepElem(rep) {
 		labour: "L",
 		green: "G",
 		liberal: "LB",
-		conservative: "C"
+		conservative: "C",
+		socialist: "S"
 	}[rep.party];
 
 	if (rep.district != "list") {
@@ -142,9 +144,9 @@ function createDistrictElem(districts, firstId) {
 
 function barData(votes) {
 	return [
-		[votes.green || 0, votes.labour || 0, votes.liberal || 0, votes.conservative || 0],
-		["Green", "Labour", "Liberal", "Conservative"],
-		["#8CF159", "#F15959", "#F1D859","#59BFF1"]
+		[votes.socialist || 0, votes.green || 0, votes.labour || 0, votes.liberal || 0, votes.conservative || 0],
+		["Socialist", "Green", "Labour", "Liberal", "Conservative"],
+		["hsl(300, 100%, 65%)", "hsl(100, 100%, 65%)", "hsl(0, 100%, 65%)", "hsl(50, 100%, 65%)","hsl(200, 100%, 65%)"]
 	]
 }
 
@@ -268,7 +270,8 @@ function applyResults(results) {
 		labour: "Labour",
 		green: "Green",
 		conservative: "Conservative",
-		liberal: "Liberal"
+		liberal: "Liberal",
+		socialist: "Socialist"
 	}
 
 	let govSeats = government.reduce((acc, party) => acc + repcount[party], 0);
@@ -318,27 +321,35 @@ document.getElementById("stv").onclick = function() {
 const greenSlider = document.getElementById("per-green"),
 	labourSlider = document.getElementById("per-labour"),
 	liberalSlider = document.getElementById("per-liberal"),
-	conservativeSlider = document.getElementById("per-conservative");
+	conservativeSlider = document.getElementById("per-conservative"),
+	socialistSlider = document.getElementById("per-socialist");
 function updateSliders() {
-	conservativeSlider.value = 1 - greenSlider.value - labourSlider.value - liberalSlider.value;
-	if (+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value > 1) {
-		liberalSlider.value = 1 - greenSlider.value - conservativeSlider.value - labourSlider.value;
+	conservativeSlider.value = 1 - greenSlider.value - labourSlider.value - liberalSlider.value - socialistSlider.value;
+	if (+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value + +socialistSlider.value > 1) {
+		liberalSlider.value = 1 - greenSlider.value - conservativeSlider.value - labourSlider.value - socialistSlider.value;
 	}
-	if (+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value > 1) {
-		labourSlider.value = 1 - greenSlider.value - conservativeSlider.value - liberalSlider.value;
+	if (+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value + +socialistSlider.value > 1) {
+		labourSlider.value = 1 - greenSlider.value - conservativeSlider.value - liberalSlider.value - socialistSlider.value;
 	}
+	if (+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value + +socialistSlider.value > 1) {
+		greenSlider.value = 1 - labourSlider.value - conservativeSlider.value - liberalSlider.value - socialistSlider.value;
+	}
+
+	console.log(+conservativeSlider.value + +greenSlider.value + +labourSlider.value + +liberalSlider.value + +socialistSlider.value);
 }
 
 greenSlider.oninput = updateSliders;
 liberalSlider.oninput = updateSliders;
 labourSlider.oninput = updateSliders;
+socialistSlider.oninput = updateSliders;
 
 document.getElementById("new-election").onclick = function() {
 	electorate = Simulator.generate(24, {
 		labour: +labourSlider.value,
 		green: +greenSlider.value,
 		liberal: +liberalSlider.value,
-		conservative: +conservativeSlider.value
+		conservative: +conservativeSlider.value,
+		socialist: +socialistSlider.value
 	});
 	applyElectorate(electorate, Simulator.FPTP.groupings(electorate));
 	let results = Simulator.FPTP.execute(electorate);
