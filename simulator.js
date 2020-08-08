@@ -196,13 +196,18 @@ var Simulator = (function () {
                 out.push(6);
                 i += 6;
             }
-            for (; i < e.districts.length; i += 3) {
-                if (i + 3 >= e.districts.length) {
+            if (e.districts.length > 12) {
+                out.push(3);
+                out.push(3);
+                i += 6;
+            }
+            for (; i < e.districts.length; i += 6) {
+                if (i + 6 >= e.districts.length) {
                     out.push(e.districts.length - i);
                     break;
                 }
                 else {
-                    out.push(3);
+                    out.push(6);
                 }
             }
             return out;
