@@ -29,7 +29,7 @@ main {
     width: 256px;
     margin: 0 auto; }
 #electorate-charts > div {
-    margin-top: 8px; }
+    margin-top: 16px; }
 
 #map-container {
 	max-width: 384px;
@@ -67,8 +67,6 @@ main {
 #voting-methods {
 	flex-grow: 1;
 	padding: 16px; }
-canvas {
-	margin: auto; }
 
 button {
 	border: 0;
