@@ -61,10 +61,10 @@
 		<script>
 var mapElem = document.getElementById("map");
 
-const nationalBar = new Progress(document.getElementById("electorate-national"));
-const districtBar = new Progress(document.getElementById("electorate-district"));
-const districtRepsBar = new Progress(document.getElementById("district-reps"));
-const legislatureBar = new Progress(document.getElementById("legislature-bar"));
+const nationalBar = new Progress(document.getElementById("electorate-national"), true);
+const districtBar = new Progress(document.getElementById("electorate-district"), true);
+const districtRepsBar = new Progress(document.getElementById("district-reps"), false);
+const legislatureBar = new Progress(document.getElementById("legislature-bar"), false);
 
 function createRepElem(rep) {
 	var elem = document.createElement("div");

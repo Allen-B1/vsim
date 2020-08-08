@@ -1,7 +1,8 @@
 var Progress = /** @class */ (function () {
-    function Progress(elem) {
+    function Progress(elem, percent) {
         this.elem = elem;
         this.elem.classList.add("progress");
+        this.percent = percent;
     }
     Progress.prototype.setData = function (data, labels, colors) {
         this.elem.innerHTML = "";
@@ -15,7 +16,7 @@ var Progress = /** @class */ (function () {
             elem.style.backgroundColor = color;
             elem.style.width = percent * 100 + "%";
             var display = data[i];
-            if (sum >= 0.99 && sum <= 1) {
+            if (this.percent) {
                 display = display * 100;
                 display = display.toFixed(1) + "%";
             }

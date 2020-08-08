@@ -1,9 +1,11 @@
 class Progress {
     elem: HTMLDivElement
+    percent: boolean
 
-    constructor(elem: HTMLDivElement) {
+    constructor(elem: HTMLDivElement, percent: boolean) {
         this.elem = elem;
         this.elem.classList.add("progress");
+        this.percent = percent;
     }
 
     setData(data: number[], labels: string[], colors: string[]) {
@@ -19,7 +21,7 @@ class Progress {
             elem.style.width = percent*100 + "%";
 
             let display: any = data[i];
-            if (sum >= 0.99 && sum <= 1) {
+            if (this.percent) {
                 display = display * 100;
                 display = display.toFixed(1) + "%";
             }
