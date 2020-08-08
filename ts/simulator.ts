@@ -161,7 +161,7 @@ const Simulator = (function() {
 
         let winners = [];
 
-        for (let j = 0; j < 50; j++) {
+        outer: for (let j = 0; j < 50; j++) {
             // Winners
             let foundWinner = false;
             // Keep finding winners & rolling over until no more winners.
@@ -190,6 +190,7 @@ const Simulator = (function() {
                     }
                 }
 
+                if (winners.length >= reps) break outer;
                 if (!foundWinner) break;
             }
 

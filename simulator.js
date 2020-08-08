@@ -123,7 +123,7 @@ var Simulator = (function () {
             irvotes[rank] = votes[party];
         }
         var winners = [];
-        for (var j = 0; j < 50; j++) {
+        outer: for (var j = 0; j < 50; j++) {
             // Winners
             var foundWinner = false;
             // Keep finding winners & rolling over until no more winners.
@@ -149,6 +149,8 @@ var Simulator = (function () {
                         break;
                     }
                 }
+                if (winners.length >= reps)
+                    break outer;
                 if (!foundWinner)
                     break;
             }

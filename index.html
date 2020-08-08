@@ -2,212 +2,8 @@
 <html lang="en">
 	<head>
 		<title>Elections</title>
-		<style>
-body {
-	background: #fff;
-	font-family: sans-serif;
-}
-h1, h2, h3 {
-	text-align: center;
-}
-h5 {
-	margin: 0;
-	margin-bottom: 4px;
-}
-
-main {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-}
-
-#section-election {
-	grid-column: 1 / span 2;
-	grid-row: 1;
-}
-
-#electorate {
-	display: flex;
-	flex-direction: column;
-}
-#electorate-charts {
-	display: flex;
-	flex-direction: row;
-	justify-content: center; }
-
-#map-container {
-	max-width: 384px;
-	position: relative;
-	margin: auto; }
-#map-container > :first-child {
-	padding-bottom: 66.66%; }
-
-#map {
-	background: #fff;
-	display: grid;
-	grid-template-rows: repeat(4, 1fr);
-	grid-template-columns: repeat(6, 1fr);
-
-	position: absolute;
-	top: 0; left: 0; bottom: 0; right: 0;
-}
-.district {
-	margin: 2px;
-	border: 4px solid #ddd;
-	background: #ddd;
-}
-.district:focus {
-	border: 4px solid #000 !important;
-	outline: 0;
-}
-
-#section-results {
-	display: flex;
-	flex-direction: column; }
-#results-header {
-	display: flex;
-	flex-direction: row;
-	margin-bottom: 16px; }
-#voting-methods {
-	flex-grow: 1;
-	padding: 16px; }
-canvas {
-	margin: auto; }
-
-button {
-	border: 0;
-	background: #fff;
-	border: 2px solid #fff;
-	padding: 4px 8px;
-	font-size: 16px;
-}
-button:active {
-	background: #ddd;
-}
-#voting-methods button.active-method {
-	background: #ddd;
-}
-
-#legislature {
-	margin: 16px;
-	background: #eee;
-	padding: 16px;
-
-	display: grid;
-	grid-template-rows: auto 1fr auto;
-	grid-template-columns: 1fr max-width;
-}
-#legislature h4 {
-	grid-row: 3;
-	grid-column: 1 / span 2;
-	text-align: center;
-	margin-bottom: 0;
-}
-#legislature-government {
-	grid-row: 2;
-	grid-column: 1;
-	align-items: flex-end;
-	align-content: flex-end;
-	justify-content: flex-start; }
-#legislature-opposition {
-	grid-row: 1;
-	grid-column: 1;
-	align-items: flex-start;
-	align-content: flex-end;
-	justify-content: flex-start;
-	flex-wrap: wrap-reverse !important;
-	padding-bottom: 24px; }
-#legislature-crossbench {
-	grid-row: 1 / span 2;
-	grid-column: 2;
-
-	align-self: center;
-	justify-self: flex-end;
-
-	max-height: 384px;
-
-	display: flex;
-	flex-direction: row-reverse;
-	flex-wrap: wrap-reverse;
-	justify-content: flex-start;
-	align-content: flex-end;
-	padding-left: 8px;
-	max-width: 96px; }
-
-#legislature-government, #legislature-opposition {
-	display: flex;
-	flex-wrap: wrap;
-}
-
-#legislature-opposition:empty, #legislature-crossbench:empty {
-	padding: 0;
-	display: none;
-}
-
-.rep {
-	display: inline-block;
-	padding: 8px 0;
-	text-align: center;
-	width: 28px;
-	font-size: 12px;
-	color: rgba(0,0,0,0.9);
-	margin: 4px;
-	border: 4px solid;
-}
-.rep.active {
-	border: 4px solid #aaa;
-}
-.rep.primary.active {
-	border: 4px solid #000;
-}
-
-
-.rep-labour {
-	background:hsl(0, 100%, 65%);
-	border-color: hsl(0, 100%, 65%) }
-.rep-conservative {
-	background: hsl(200, 100%, 65%);
-	border-color: hsl(200, 100%, 65%) }
-.rep-liberal {
-	background: hsl(50, 100%, 65%);
-	border-color: hsl(50, 100%, 65%) }
-.rep-green {
-	background: hsl(100, 100%, 65%);
-	border-color:hsl(100, 100%, 65%); }
-
-.text-conservative {
-	color: hsl(200, 100%, 45%); }
-.text-liberal {
-	color: hsl(50, 100%, 45%); }
-.text-labour {
-	color: hsl(0, 100%, 45%); }
-.text-green {
-	color:hsl(100, 100%, 45%) }
-
-#section-election {
-	width: 200px;
-	padding: 16px;
-	background: #eee;
-	text-align: center;
-	position: fixed;
-	left: 16px;
-	bottom: 16px;
-}
-.per-cnt {
-	display: flex; }
-.per-cnt span {
-	flex-grow: 1;
-	text-align: right;
-	padding: 0 8px;
-	display: inline-block; }
-#section-election button {
-	background: #eee;
-	border-color: #eee;
-	margin: auto; 
-	margin-top: 8px; }
-#section-election button:active {
-	background: #ddd; }
-
-		</style>
+		<link rel="stylesheet" href="progress.css">
+		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
 		<section id="section-election">
@@ -230,12 +26,8 @@ button:active {
 					</div>
 				</div>
 				<div id="electorate-charts">
-					<div id="electorate-national">
-						<canvas id="chart1" width="128" height="128"></canvas>
-					</div>
-					<div id="district" style="display:none">
-						<canvas id="chart3" width="128" height="128"></canvas>
-					</div>
+					<div id="electorate-national"></div>
+					<div id="electorate-district" style="display:none"></div>
 				</div>
 			</section>
 
@@ -247,7 +39,7 @@ button:active {
 						<button id="irv">IRV</button>
 						<button id="stv">STV</button>
 					</div>
-					<canvas id="chart2" width="128" height="128"></canvas>
+					<div id="legislature-bar" class="end"></div>
 				</div>
 				<div id="legislature">
 					<h4 id="legislature-title">Government</h4>
@@ -259,41 +51,14 @@ button:active {
 		</main>
 
 		<script src="simulator.js"></script>
+		<script src="progress.js"></script>
 		<script src="chart.js"></script>
 		<script>
 var mapElem = document.getElementById("map");
-var chart1Ctx = document.getElementById("chart1").getContext("2d");
-var chart2Ctx = document.getElementById("chart2").getContext("2d");
-var chart3Ctx = document.getElementById("chart3").getContext("2d");
 
-var chartConfig = {
-	type: 'pie',
-	options: {
-		animation: {duration: 0},
-		legend: {display: false},
-		title: {text: "", display: true},
-		tooltips: {
-			callbacks: {
-				label: function(tooltipItem, data) {
-					var label = data.labels[tooltipItem.index] || "";
-					var percent = data.datasets[0].data[tooltipItem.index] * 100;
-					percent = percent.toFixed(1) + "%";
-					return label + ": " + percent;
-				}
-			}
-		},
-		responsive: false
-	},
-};
-var chart1 = new Chart(chart1Ctx, Object.create(chartConfig));
-var chart2 = new Chart(chart2Ctx, Object.create(chartConfig));
-var chart3 = new Chart(chart3Ctx, Object.create(chartConfig));
-
-chart2.config.options.title.text = "Legislature";
-chart2.config.options.tooltips.callbacks.label = function(tooltipItem, data) {
-	var label = data.labels[tooltipItem.index] || "";
-	return label + ": " + data.datasets[0].data[tooltipItem.index];
-}
+const nationalBar = new Progress(document.getElementById("electorate-national"));
+const districtBar = new Progress(document.getElementById("electorate-district"));
+const legislatureBar = new Progress(document.getElementById("legislature-bar"));
 
 function createRepElem(rep) {
 	var elem = document.createElement("div");
@@ -369,14 +134,12 @@ function createDistrictElem(districts, firstId) {
 	return elem;
 }
 
-function chartData(votes) {
-	return {
-		labels: ["Green", "Labour", "Liberal", "Conservative"],
-		datasets: [{
-			data: [votes.green, votes.labour, votes.liberal, votes.conservative],
-			backgroundColor: ["#8CF159", "#F15959", "#F1D859","#59BFF1"]
-		}],
-	}
+function barData(votes) {
+	return [
+		[votes.green || 0, votes.labour || 0, votes.liberal || 0, votes.conservative || 0],
+		["Green", "Labour", "Liberal", "Conservative"],
+		["#8CF159", "#F15959", "#F1D859","#59BFF1"]
+	]
 }
 
 function applyElectorate(electorate, shape) {
@@ -393,10 +156,9 @@ function applyElectorate(electorate, shape) {
 		let districts = electorate.districts.slice(i, i+size);
 		const elem = createDistrictElem(districts, ids[0]);
 		elem.onfocus = function() {
-			chart3.data = chartData(Simulator.getTotalVotes(districts))
-			chart3.config.options.title.text =  "District " + ids.join("-");
-			chart3.update();
-			document.getElementById("district").style.display = "block";
+			let votes = Simulator.getTotalVotes(districts);
+			districtBar.setData(...barData(votes));
+			districtBar.elem.style.display = "block";
 
 			for (let id of ids) {
 				let reps = document.getElementsByClassName("rep-district-" + id);
@@ -406,10 +168,7 @@ function applyElectorate(electorate, shape) {
 			}
 		};
 		elem.onblur = function() {
-			chart3.data = {labels:[],datasets:[{data:[]}]};
-			chart3.config.options.title.text = "";
-			chart3.update();
-			document.getElementById("district").style.display = "none";
+			districtBar.elem.style.display = "none";
 			let reps = document.querySelectorAll(".rep.active");
 			for (let rep of reps) {
 				rep.classList.remove("active");				
@@ -421,9 +180,7 @@ function applyElectorate(electorate, shape) {
 	}
 
 	var totalVotes = Simulator.getTotalVotes(electorate.districts);
-	chart1.data = chartData(totalVotes);
-	chart1.config.options.title.text = "Popular Vote";
-	chart1.update();
+	nationalBar.setData(...barData(totalVotes));
 
 	if (totalVotes.labour >= 0.99) {
 		document.getElementById("country").innerHTML = "China";
@@ -438,8 +195,8 @@ function applyResults(results) {
 		let rep = results[i];
 		repcount[rep.party] = (repcount[rep.party] | 0) + 1;
 	}
-	chart2.data = chartData(repcount);
-	chart2.update();
+
+	legislatureBar.setData(...barData(repcount));
 
 	var parties = [];
 	for (let party in repcount) {

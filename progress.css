@@ -1,0 +1,38 @@
+.progress {
+    display: block;
+    height: 36px;
+}
+
+.progress div {
+    display: inline-block;
+    height: 36px;
+    position: relative;
+}
+
+.progress div:hover::before {
+    position: absolute;
+    top: 36px;
+    left: 0;
+    white-space: nowrap;
+    content: attr(data-tooltip);
+    display: inline-block;
+    padding: 4px 8px;
+
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    z-index: 2;
+}
+.progress.end div:hover::before, .progress:not(.end) div:last-child:hover::before {
+    right: 0;
+    left: auto;
+}
+
+.progress:not(.end) div:first-child:hover::before, .progress.end div:first-child:hover::before {
+    left: 0;
+    right: auto;
+}
+
+.progress.end div:first-child:last-child:hover::before {
+    right: 0;
+    left: auto;
+}
