@@ -235,8 +235,6 @@ function applyResults(results) {
 
 	let crossbench = parties.filter((party) => government.indexOf(party) == -1 && opposition.indexOf(party) == -1);
 
-	console.log(government, opposition);
-
 	let govElem = document.getElementById("legislature-government"),
 		oppElem =  document.getElementById("legislature-opposition"),
 		crossElem = document.getElementById("legislature-crossbench");
@@ -273,7 +271,11 @@ function applyResults(results) {
 		liberal: "Liberal"
 	}
 
-	document.getElementById("legislature-title").innerHTML = government.map((party) => labels[party]).join("-") + " Government";
+	let govSeats = government.reduce((acc, party) => acc + repcount[party], 0);
+	let minority = (govSeats * 2) < results.length;
+	console.log(govSeats + "/" + results.length + " = " + minority);
+
+	document.getElementById("legislature-title").innerHTML = government.map((party) => labels[party]).join("-") + (minority?" Minority":" Majority") + " Government";
 }
 
 let electorate = Simulator.generate(24, {
