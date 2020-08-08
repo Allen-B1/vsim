@@ -136,7 +136,7 @@ const Simulator = (function() {
             labour: ["labour", "green", "liberal"],
             green: ["green", "labour", "liberal"],
             conservative: ["conservative", "liberal", "green"],
-            socialist: ["labour", "green"]
+            socialist: ["socialist", "labour", "green"]
         };
 
         let irvotes = {};
@@ -158,7 +158,8 @@ const Simulator = (function() {
             // Keep finding winners & rolling over until no more winners.
             for(let k = 0; k < 10; k++) {
                 let primaryVotes = irvCalculatePrimary(irvotes);
-                for (let party in primaryVotes) {
+                let order = Simulator.getPluralities(primaryVotes);
+                for (let party of order) {
                     // If they crossed the winning threshold,
                     // add them to the winner list & rollover votes.
                     if (primaryVotes[party] > threshold) {
@@ -218,7 +219,6 @@ const Simulator = (function() {
             for (let size of groupings) {
                 let districts = e.districts.slice(startId, startId+size);
                 let votes = Simulator.getTotalVotes(districts)
-                console.log(startId);
                 let winners = irvRun(size, votes);
                 
 
