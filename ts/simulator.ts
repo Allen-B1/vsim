@@ -236,22 +236,17 @@ const Simulator = (function() {
         groupings: function(e: Electorate): number[] {
             let out = [];
             let i = 0;
-            if (e.districts.length > 6) {
+            if (e.districts.length > 5) {
+                out.push(2);
                 out.push(3);
-                out.push(3);
-                i += 6;
+                i += 5;
             }
-            if (e.districts.length > 6*3) {
-                out.push(6);
-                out.push(6);
-                i += 12;
-            }
-            for (; i < e.districts.length; i += 3) {
-                if (i + 3 >= e.districts.length) {
+            for (; i < e.districts.length; i += 5) {
+                if (i + 5 >= e.districts.length) {
                     out.push(e.districts.length - i);
                     break;
                 } else {
-                    out.push(3);
+                    out.push(5);
                 }
             }
             return out;
@@ -321,17 +316,18 @@ const Simulator = (function() {
         groupings: function(e: Electorate): number[] {
             let out = [];
             let i = 0;
-            if (e.districts.length > 18) {
-                out.push(6);
-                out.push(12);
-                i += 18;
+            if (e.districts.length > 20) {
+                out.push(5);
+                out.push(5);
+                out.push(10);
+                i += 20;
             }
-            for (; i < e.districts.length; i += 6) {
-                if (i + 6 >= e.districts.length) {
+            for (; i < e.districts.length; i += 5) {
+                if (i + 5 >= e.districts.length) {
                     out.push(e.districts.length - i);
                     break;
                 } else {
-                    out.push(6);
+                    out.push(5);
                 }
             }
             return out;

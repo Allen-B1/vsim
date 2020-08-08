@@ -119,8 +119,8 @@ function createDistrictElem(districts, firstId) {
 	var elem = document.createElement("div");
 	elem.className = "district";
 	elem.width = 64 + "px";
-	if (districts.length == 12) {
-		elem.style.gridColumnEnd = "span 6";
+	if (districts.length == 10) {
+		elem.style.gridColumnEnd = "span 5";
 		elem.style.gridRowEnd = "span 2";
 	} else {
 		elem.style.gridColumnEnd = "span " + districts.length;
@@ -289,7 +289,7 @@ function applyResults(results) {
 	document.getElementById("legislature-title").innerHTML = government.map((party) => labels[party]).join("-") + (minority?" Minority":" Majority") + " Government";
 }
 
-let electorate = Simulator.generate(24, {
+let electorate = Simulator.generate(25, {
 	labour: 0.3,
 	green: 0.1,
 	liberal: 0.2,
@@ -357,7 +357,7 @@ labourSlider.oninput = updateSliders;
 socialistSlider.oninput = updateSliders;
 
 document.getElementById("new-election").onclick = function() {
-	electorate = Simulator.generate(24, {
+	electorate = Simulator.generate(25, {
 		labour: +labourSlider.value,
 		green: +greenSlider.value,
 		liberal: +liberalSlider.value,
