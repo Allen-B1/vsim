@@ -355,7 +355,7 @@ const Simulator = (function() {
                 };
 
                 let voters = {};
-                voterloop: for (let i = 0; i < 25; i++) {
+                voterloop: for (let i = 0; i < 17; i++) {
                     let n = Math.random();
                     for (let party in ranges) {
                         if (ranges[party][0] <= n && n < ranges[party][1]) {
@@ -368,7 +368,7 @@ const Simulator = (function() {
                 }
 
                 for (let party in voters) {
-                    district.voters[party] = voters[party] / 25;                    
+                    district.voters[party] = voters[party] / 17;                    
                 }
                 districtlist.push(district);
             }
