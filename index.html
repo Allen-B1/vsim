@@ -44,6 +44,7 @@
 						<button id="nw-mmp">NW-MMP</button>
 						<button id="irv">IRV</button>
 						<button id="stv">STV</button>
+						<button id="lo-pr">LO-PR</button>
 					</div>
 					<div id="legislature-bar" class="end"></div>
 				</div>
@@ -118,7 +119,12 @@ function createDistrictElem(districts, firstId) {
 	var elem = document.createElement("div");
 	elem.className = "district";
 	elem.width = 64 + "px";
-	elem.style.gridColumnEnd = "span " + districts.length;
+	if (districts.length == 12) {
+		elem.style.gridColumnEnd = "span 6";
+		elem.style.gridRowEnd = "span 2";
+	} else {
+		elem.style.gridColumnEnd = "span " + districts.length;
+	}
 	for (let id = firstId; id < firstId + districts.length; id++) {
 		elem.classList.add("district-" + id);
 	}
@@ -316,6 +322,11 @@ document.getElementById("irv").onclick = function() {
 }
 document.getElementById("stv").onclick = function() {
 	changeMethod(Simulator.STV);
+	this.classList.add("active-method");
+}
+
+document.getElementById("lo-pr").onclick = function() {
+	changeMethod(Simulator.LO_PR);
 	this.classList.add("active-method");
 }
 

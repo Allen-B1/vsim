@@ -237,10 +237,6 @@ const Simulator = (function() {
             let out = [];
             let i = 0;
             if (e.districts.length > 6) {
-                out.push(6);
-                i += 6;
-            }
-            if (e.districts.length > 12) {
                 out.push(3);
                 out.push(3);
                 i += 6;
@@ -251,6 +247,86 @@ const Simulator = (function() {
                     break;
                 } else {
                     out.push(6);
+                }
+            }
+            return out;
+        }
+    }
+
+    // D'Hondt method
+    function prRun(repcount: number, votes: Votes): string[] {
+        let reps: string[] = [];
+        while (reps.length < repcount) {
+            let repprop = {};
+            for (let party of reps) {
+                repprop[party] = (repprop[party]|0) + 1;
+            }
+
+            let quotients = {};
+            for (let party in votes) {
+                quotients[party] = votes[party] / ((repprop[party]||0) + 1);
+            }
+
+            let max = -Infinity;
+            let winningParty = "";
+            for (let party in quotients) {
+                if (quotients[party] > max) {
+                    winningParty = party;
+                    max = quotients[party];
+                }
+            }
+
+            reps.push(winningParty);
+        }
+
+        return reps;
+    }
+
+    const LO_PR: VotingMethod = {
+        execute: function(e: Electorate): Results {
+            let reps: Results = [];
+            let startId = 0;
+            let groupings = LO_PR.groupings(e);
+
+            for (let size of groupings) {
+                // calculate party-lists
+                // assume all voters vote for a candidate from their district
+                let votes = Simulator.getTotalVotes(e.districts.slice(startId, startId+size));
+                let partyLists = {};
+                for (let party in votes) {
+                    partyLists[party] = Array(size).fill(0).map((_, i) => i + startId);
+                }
+
+                for (let party in partyLists) {
+                    partyLists[party].sort(function(da, db) {
+                        return e.districts[db].voters[party] - e.districts[da].voters[party]; 
+                    });
+                }
+
+                let seatList = prRun(size, votes);
+                for (let party of seatList) {
+                    let district = partyLists[party].shift();
+                    reps.push({district: district, party: party, primary: true});
+                }
+
+                startId += size;
+            }
+            return reps;
+        },
+        groupings: function(e: Electorate): number[] {
+            let out = [];
+            let i = 0;
+            if (e.districts.length > 12) {
+                out.push(6);
+                out.push(6);
+                i += 12;
+            }
+            for (; i < e.districts.length; i += 12) {
+                if (i + 12 >= e.districts.length) {
+                    out.push(e.districts.length - i);
+                    break;
+                } else {
+                    out.push(12);
                 }
             }
             return out;
@@ -326,5 +402,6 @@ const Simulator = (function() {
         NW_MMP: NW_MMP,
         IRV: IRV,
         STV: STV,
+        LO_PR: LO_PR
     }
 })();

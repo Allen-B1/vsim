@@ -193,10 +193,6 @@ var Simulator = (function () {
             var out = [];
             var i = 0;
             if (e.districts.length > 6) {
-                out.push(6);
-                i += 6;
-            }
-            if (e.districts.length > 12) {
                 out.push(3);
                 out.push(3);
                 i += 6;
@@ -208,6 +204,83 @@ var Simulator = (function () {
                 }
                 else {
                     out.push(6);
+                }
+            }
+            return out;
+        }
+    };
+    // D'Hondt method
+    function prRun(repcount, votes) {
+        var reps = [];
+        while (reps.length < repcount) {
+            var repprop = {};
+            for (var _i = 0, reps_2 = reps; _i < reps_2.length; _i++) {
+                var party = reps_2[_i];
+                repprop[party] = (repprop[party] | 0) + 1;
+            }
+            var quotients = {};
+            for (var party in votes) {
+                quotients[party] = votes[party] / ((repprop[party] || 0) + 1);
+            }
+            var max = -Infinity;
+            var winningParty = "";
+            for (var party in quotients) {
+                if (quotients[party] > max) {
+                    winningParty = party;
+                    max = quotients[party];
+                }
+            }
+            reps.push(winningParty);
+        }
+        return reps;
+    }
+    var LO_PR = {
+        execute: function (e) {
+            var reps = [];
+            var startId = 0;
+            var groupings = LO_PR.groupings(e);
+            for (var _i = 0, groupings_2 = groupings; _i < groupings_2.length; _i++) {
+                var size = groupings_2[_i];
+                // calculate party-lists
+                // assume all voters vote for a candidate from their district
+                var votes = Simulator.getTotalVotes(e.districts.slice(startId, startId + size));
+                var partyLists = {};
+                for (var party in votes) {
+                    partyLists[party] = Array(size).fill(0).map(function (_, i) { return i + startId; });
+                }
+                var _loop_1 = function (party) {
+                    partyLists[party].sort(function (da, db) {
+                        return e.districts[db].voters[party] - e.districts[da].voters[party];
+                    });
+                };
+                for (var party in partyLists) {
+                    _loop_1(party);
+                }
+                var seatList = prRun(size, votes);
+                for (var _a = 0, seatList_1 = seatList; _a < seatList_1.length; _a++) {
+                    var party = seatList_1[_a];
+                    var district = partyLists[party].shift();
+                    reps.push({ district: district, party: party, primary: true });
+                }
+                startId += size;
+            }
+            return reps;
+        },
+        groupings: function (e) {
+            var out = [];
+            var i = 0;
+            if (e.districts.length > 12) {
+                out.push(6);
+                out.push(6);
+                i += 12;
+            }
+            for (; i < e.districts.length; i += 12) {
+                if (i + 12 >= e.districts.length) {
+                    out.push(e.districts.length - i);
+                    break;
+                }
+                else {
+                    out.push(12);
                 }
             }
             return out;
@@ -275,6 +348,7 @@ var Simulator = (function () {
         FPTP: FPTP,
         NW_MMP: NW_MMP,
         IRV: IRV,
-        STV: STV
+        STV: STV,
+        LO_PR: LO_PR
     };
 })();
