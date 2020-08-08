@@ -29,7 +29,7 @@ var Simulator = (function () {
                 repcount[winner] = (repcount[winner] | 0) + 1;
             }
             var votes = Simulator.getTotalVotes(e.districts);
-            while (reps.length < e.districts.length * 2) {
+            while (reps.length < e.districts.length * 2 + 1) {
                 // amount underrepresented
                 var quotients = {};
                 for (var party in votes) {

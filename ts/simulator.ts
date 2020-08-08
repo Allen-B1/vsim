@@ -58,7 +58,7 @@ const Simulator = (function() {
 
             let votes = Simulator.getTotalVotes(e.districts);
 
-            while (reps.length < e.districts.length * 2) {
+            while (reps.length < e.districts.length * 2 + 1) {
                 // amount underrepresented
                 let quotients = {};
                 for (let party in votes) {
